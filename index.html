@@ -17,7 +17,8 @@
         
         #test-area { display: none; margin-top: 20px; padding: 30px; border: 3px solid #4a90e2; border-radius: 12px; text-align: center; background: #fff; }
         #question-info { color: #7f8c8d; font-size: 0.9em; margin-bottom: 10px; }
-        #question-text { font-size: 2.2em; margin: 20px 0; color: #2c3e50; font-weight: bold; line-height: 1.4; }
+        #question-text { font-size: 1.6em; margin: 20px 0; color: #2c3e50; font-weight: bold; line-height: 1.6; word-break: keep-all; }
+        #question-translation { font-size: 1.1em; color: #7f8c8d; margin-bottom: 20px; }
         
         /* 주관식 입력 */
         #input-mode { margin-bottom: 15px; }
@@ -48,7 +49,7 @@
     <div class="btn-group">
         <button class="btn-test" onclick="startTest('toEng', 'input')">뜻 → 영어(쓰기)</button>
         <button class="btn-test" onclick="startTest('toKor', 'input')">영어 → 뜻(쓰기)</button>
-        <button class="btn-choice" onclick="startTest('toKor', 'choice')">객관식 (영→뜻)</button>
+        <button class="btn-choice" onclick="startTest('toEng', 'choice')">객관식 (예문 빈칸)</button>
         <button class="btn-mix" onclick="startTest('mix', 'input')">랜덤 혼합 주관식</button>
         <button class="btn-wrong" onclick="startTest('toEng', 'input', true)">오답 주관식</button>
         <button class="btn-reset" onclick="resetIncorrect()">오답 초기화</button>
@@ -57,6 +58,7 @@
     <div id="test-area">
         <div id="question-info"></div>
         <div id="question-text"></div>
+        <div id="question-translation"></div>
         
         <div id="input-mode">
             <input type="text" id="answerInput" placeholder="정답 입력 후 Enter" onkeypress="if(event.keyCode==13) checkAnswer()">
@@ -75,56 +77,156 @@
 
 <script>
     const defaultWords = [
-        {word: "a wide array of", mean: "다양한"}, {word: "account for", mean: "차지하다"}, {word: "acknowledge", mean: "수령을 알리다"},
-        {word: "acquire", mean: "인수하다"}, {word: "adhere to", mean: "~을 준수하다"}, {word: "compliance", mean: "준수"},
-        {word: "comply with", mean: "~을 준수하다"}, {word: "adversely", mean: "부정적으로"}, {word: "advocate", mean: "지지하다"},
-        {word: "affordable", mean: "가격이 적당한"}, {word: "aggregate", mean: "합계의"}, {word: "alleviate", mean: "완화하다"},
-        {word: "mitigate", mean: "완화시키다"}, {word: "ambiguous", mean: "모호한"}, {word: "ample", mean: "충분한"},
-        {word: "as of late", mean: "최근에"}, {word: "assess", mean: "평가하다"}, {word: "attest to", mean: "~을 증명하다"},
-        {word: "attribute", mean: "~의 덕분으로 돌리다"}, {word: "auspicious", mean: "유망한"}, {word: "prospective", mean: "유망한"},
-        {word: "be consistent with", mean: "~와 일치하다"}, {word: "coincide", mean: "일치하다"}, {word: "be entitled to", mean: "~할 자격이 있다"},
-        {word: "eligible", mean: "자격이 있는"}, {word: "be liable for", mean: "~에 대해 책임이 있다"}, {word: "belated", mean: "뒤늦은"},
-        {word: "briefly", mean: "잠시"}, {word: "broaden", mean: "넓히다"}, {word: "circumvent", mean: "우회하다"},
-        {word: "coherent", mean: "일관성 있는"}, {word: "commence", mean: "시작되다"}, {word: "commitment to", mean: "~에 대한 헌신"},
-        {word: "dedicate", mean: "헌신하다"}, {word: "confidential", mean: "기밀의"}, {word: "conducive", mean: "도움이 되는"},
-        {word: "contingency plan", mean: "비상 대책"}, {word: "contrary to", mean: "~와는 반대로"}, {word: "curtail", mean: "축소하다"},
-        {word: "delegate", mean: "위임하다"}, {word: "deplete", mean: "고갈시키다"}, {word: "designated", mean: "지정된"},
-        {word: "deterrent", mean: "억제책"}, {word: "detrimental", mean: "해로운"}, {word: "devote A to B", mean: "A를 B에 쏟다"},
-        {word: "discretion", mean: "재량"}, {word: "discretionary", mean: "자유 재량의"}, {word: "discrepancy", mean: "불일치"},
-        {word: "draw a conclusion", mean: "결론을 도출하다"}, {word: "efficiently", mean: "효율적으로"}, {word: "eliminate", mean: "제거하다"},
-        {word: "encompass", mean: "포함하다"}, {word: "endorse", mean: "승인하다"}, {word: "erroneous", mean: "잘못된"},
-        {word: "excursion", mean: "짧은 여행"}, {word: "exquisite", mean: "정교한"}, {word: "facilitate", mean: "용이하게 하다"},
-        {word: "familiarize with", mean: "~에 익숙해지다"}, {word: "favorable", mean: "호의적인"}, {word: "feasibility", mean: "실연 가능성"},
-        {word: "fluctuate", mean: "변동하다"}, {word: "formidable", mean: "위협적인"}, {word: "fragile", mean: "깨지기 쉬운"},
-        {word: "galvanize", mean: "활력을 불어넣다"}, {word: "genuine", mean: "진짜의"}, {word: "go into effect", mean: "효력을 발생하다"},
-        {word: "halt", mean: "중단하다"}, {word: "haphazard", mean: "무계획적인"}, {word: "heed", mean: "주의를 기울이다"},
-        {word: "hinder", mean: "방해하다"}, {word: "hospitality", mean: "환대"}, {word: "impeccable", mean: "결점 없는"},
-        {word: "imperative", mean: "필수적인"}, {word: "vital", mean: "필수적인"}, {word: "impending", mean: "임박한"},
-        {word: "imply", mean: "암시하다"}, {word: "in accordance with", mean: "~에 부합하여"}, {word: "in conjunction with", mean: "~와 협력하여"},
-        {word: "in light of", mean: "~을 고려하여"}, {word: "under consideration", mean: "고려 중인"}, {word: "in the event of", mean: "~의 경우에"},
-        {word: "incentive", mean: "장려책"}, {word: "incur", mean: "발생시키다"}, {word: "inherent", mean: "내재된"},
-        {word: "itinerary", mean: "여행 일정표"}, {word: "jointly", mean: "공동으로"}, {word: "judicious", mean: "현명한"},
-        {word: "keen", mean: "열망하는"}, {word: "keep in mind", mean: "명심하다"}, {word: "keep track of", mean: "~을 파악하다"},
-        {word: "keep up with", mean: "~을 따라잡다"}, {word: "legible", mean: "읽기 쉬운"}, {word: "leverage", mean: "활용하다"},
-        {word: "take advantage of", mean: "~을 활용하다"}, {word: "utilize", mean: "활용하다"}, {word: "liaise", mean: "연락하다"},
-        {word: "lucid", mean: "명료한"}, {word: "lucrative", mean: "수익성이 좋은"}, {word: "mandatory", mean: "의무적인"},
-        {word: "manifest", mean: "나타내다"}, {word: "moderate", mean: "적당한"}, {word: "modification", mean: "수정"},
-        {word: "noteworthy", mean: "주목할 만한"}, {word: "notify", mean: "통지하다"}, {word: "obsolete", mean: "구식의"},
-        {word: "on behalf of", mean: "~을 대신하여"}, {word: "on short notice", mean: "갑작스럽게"}, {word: "optimize", mean: "최적화하다"},
-        {word: "overhaul", mean: "점검하다"}, {word: "oversee", mean: "감독하다"}, {word: "pave", mean: "(길을) 닦다"},
-        {word: "pending", mean: "미결의"}, {word: "perpetual", mean: "영구적인"}, {word: "point of contact", mean: "연락 담당자"},
-        {word: "precarious", mean: "불안정한"}, {word: "precaution", mean: "예방 조치"}, {word: "preliminary", mean: "예비의"},
-        {word: "prerequisite", mean: "전제 조건"}, {word: "prior to", mean: "~보다 앞서"}, {word: "promptly", mean: "즉시"},
-        {word: "prosperous", mean: "번영하는"}, {word: "provisional estimate", mean: "임시 견적"}, {word: "reimburse", mean: "환급하다"},
-        {word: "refrain from", mean: "~을 자제하다"}, {word: "reluctant", mean: "꺼리는"}, {word: "resilient", mean: "회복력 있는"},
-        {word: "retrieve", mean: "검색하다"}, {word: "scrupulous", mean: "꼼꼼한"}, {word: "scrutinize", mean: "면밀히 조사하다"},
-        {word: "stagnant", mean: "정체된"}, {word: "stem from", mean: "~에서 기인하다"}, {word: "stipulate", mean: "규정하다"},
-        {word: "stringent", mean: "엄격한"}, {word: "sturdy", mean: "튼튼한"}, {word: "subsequent", mean: "차후의"},
-        {word: "take precedence", mean: "우선권을 갖다"}, {word: "tedious", mean: "지루한"}, {word: "temporarily", mean: "일시적으로"},
-        {word: "tentatively", mean: "잠정적으로"}, {word: "terminate", mean: "종료하다"}, {word: "unanimous", mean: "만장일치의"},
-        {word: "unprecedented", mean: "전례 없는"}, {word: "unravel", mean: "해결하다"}, {word: "validity", mean: "유효성"},
-        {word: "verify", mean: "확인하다"}, {word: "versatile", mean: "다재다능한"}, {word: "vigilant", mean: "경계하는"},
-        {word: "volatile", mean: "변동이 심한"}, {word: "withstand", mean: "견디다"}, {word: "yield", mean: "산출하다"}
+        {word: "a wide array of", mean: "다양한", ex: "The store offers a wide array of electronic accessories for laptops.", trans: "그 상점은 노트북을 위한 다양한 전자 액세서리를 제공합니다."},
+        {word: "account for", mean: "차지하다", ex: "Overseas sales account for more than half of the company's total profit.", trans: "해외 매출이 회사 전체 이익의 절반 이상을 차지합니다."},
+        {word: "acknowledge", mean: "수령을 알리다", ex: "Please acknowledge receipt of the package by signing the delivery form.", trans: "배송 양식에 서명하여 물품 수령을 확인해 주시기 바랍니다."},
+        {word: "acquire", mean: "인수하다", ex: "Our firm plans to acquire a promising startup to expand its market share.", trans: "저희 회사는 시장 점유율을 확대하기 위해 유망한 스타트업을 인수할 계획입니다."},
+        {word: "adhere to", mean: "~을 준수하다", ex: "All staff members must adhere to the safety guidelines in the laboratory.", trans: "모든 직원은 실험실 내 안전 지침을 준수해야 합니다."},
+        {word: "compliance", mean: "준수", ex: "All employees must work in compliance with the safety standards.", trans: "모든 직원은 안전 기준을 준수하며 근무해야 합니다."},
+        {word: "comply with", mean: "~을 준수하다", ex: "The new factory must comply with environmental regulations.", trans: "신설 공장은 환경 규정을 준수해야 합니다."},
+        {word: "adversely", mean: "부정적으로", ex: "The technical delay will adversely affect the product launch schedule.", trans: "기술적인 지연은 제품 출시 일정에 부정적으로 영향을 미칠 것입니다."},
+        {word: "advocate", mean: "지지하다", ex: "The group is known to advocate for the rights of underprivileged children.", trans: "그 단체는 소외 계층 아동의 권리를 지지하는 것으로 알려져 있습니다."},
+        {word: "affordable", mean: "가격이 적당한", ex: "The company aims to provide affordable housing for young professionals.", trans: "회사는 젊은 전문직 종사자들에게 가격이 적당한 주택을 제공하는 것을 목표로 합니다."},
+        {word: "aggregate", mean: "합계의", ex: "The aggregate score of the two matches decided the winner of the tournament.", trans: "두 경기의 합계 점수가 토너먼트의 승자를 결정했습니다."},
+        {word: "alleviate", mean: "완화하다", ex: "New measures were introduced to alleviate traffic congestion in the city center.", trans: "도심의 교통 정체를 완화하기 위해 새로운 조치들이 도입되었습니다."},
+        {word: "mitigate", mean: "완화시키다", ex: "Planting more trees can help mitigate the effects of climate change.", trans: "더 많은 나무를 심는 것은 기후 변화의 영향을 완화시키는 데 도움이 될 수 있습니다."},
+        {word: "ambiguous", mean: "모호한", ex: "The instructions were too ambiguous, leading to confusion among the team.", trans: "지침이 너무 모호해서 팀원들 사이에 혼란을 야기했습니다."},
+        {word: "ample", mean: "충분한", ex: "There was ample evidence to support the theory proposed by the scientist.", trans: "과학자가 제안한 이론을 뒷받침할 충분한 증거가 있었습니다."},
+        {word: "as of late", mean: "최근에", ex: "The stock market has been quite volatile as of late.", trans: "주식 시장은 최근에 상당히 변동성이 컸습니다."},
+        {word: "assess", mean: "평가하다", ex: "The committee will assess the impact of the new policy on small businesses.", trans: "위원회는 새로운 정책이 중소기업에 미치는 영향을 평가할 것입니다."},
+        {word: "attest to", mean: "~을 증명하다", ex: "His success in the industry attests to his hard work and dedication.", trans: "업계에서의 그의 성공은 그의 노고와 헌신을 증명합니다."},
+        {word: "attribute", mean: "~의 덕분으로 돌리다", ex: "The CEO attributed the company's success to the teamwork of all employees.", trans: "CEO는 회사의 성공을 모든 직원의 팀워크 덕분으로 돌렸습니다."},
+        {word: "auspicious", mean: "유망한", ex: "The project had an auspicious start with full funding secured early on.", trans: "그 프로젝트는 초기에 충분한 자금을 확보하며 유망하게 시작되었습니다."},
+        {word: "prospective", mean: "유망한", ex: "Prospective students are invited to visit the campus during the open house.", trans: "입학 희망 학생들은 오픈 하우스 기간 동안 캠퍼스를 방문하도록 초대됩니다."},
+        {word: "be consistent with", mean: "~와 일치하다", ex: "The results of the study are consistent with previous research findings.", trans: "연구 결과는 이전의 연구 결과와 일치합니다."},
+        {word: "coincide", mean: "일치하다", ex: "My vacation plans coincide with my sister’s wedding date.", trans: "내 휴가 계획이 여동생의 결혼식 날짜와 일치합니다."},
+        {word: "be entitled to", mean: "~할 자격이 있다", ex: "All full-time employees are entitled to three weeks of paid vacation per year.", trans: "모든 정규직 직원은 연간 3주의 유급 휴가를 받을 자격이 있습니다."},
+        {word: "eligible", mean: "자격이 있는", ex: "Only small businesses are eligible for the new government grant.", trans: "중소기업만이 새로운 정부 보조금을 받을 자격이 있습니다."},
+        {word: "be liable for", mean: "~에 대해 책임이 있다", ex: "The tenant is liable for any damage caused to the property during the lease.", trans: "임차인은 임대 기간 동안 건물에 발생한 모든 손상에 대해 책임이 있습니다."},
+        {word: "belated", mean: "뒤늦은", ex: "She sent a belated birthday card to her friend a week after the party.", trans: "그녀는 파티 일주일 후 친구에게 뒤늦은 생일 카드를 보냈습니다."},
+        {word: "briefly", mean: "잠시", ex: "The manager briefly explained the changes to the project schedule.", trans: "매니저는 프로젝트 일정 변경 사항을 잠시 설명했습니다."},
+        {word: "broaden", mean: "넓히다", ex: "Traveling to different countries helps to broaden one's perspective on the world.", trans: "다른 나라들을 여행하는 것은 세계에 대한 시야를 넓히는 데 도움이 됩니다."},
+        {word: "circumvent", mean: "우회하다", ex: "The company tried to circumvent the new tax laws by moving its headquarters.", trans: "회사는 본사를 이전함으로써 새로운 세법을 우회하려 했습니다."},
+        {word: "coherent", mean: "일관성 있는", ex: "The speaker presented a coherent argument that convinced the entire audience.", trans: "발표자는 모든 청중을 설득하는 일관성 있는 논거를 제시했습니다."},
+        {word: "commence", mean: "시작되다", ex: "The construction of the new office building is set to commence next month.", trans: "새 사무실 건물의 건설이 다음 달에 시작될 예정입니다."},
+        {word: "commitment to", mean: "~에 대한 헌신", ex: "The organization has a strong commitment to environmental conservation.", trans: "그 조직은 환경 보존에 대한 강한 헌신을 가지고 있습니다."},
+        {word: "dedicate", mean: "헌신하다", ex: "She decided to dedicate her life to helping the underprivileged.", trans: "그녀는 소외 계층을 돕는 데 평생을 헌신하기로 결심했습니다."},
+        {word: "confidential", mean: "기밀의", ex: "All patient records are kept strictly confidential within the hospital.", trans: "모든 환자 기록은 병원 내에서 엄격히 기밀로 유지됩니다."},
+        {word: "conducive", mean: "도움이 되는", ex: "A quiet environment is conducive to studying for long periods of time.", trans: "조용한 환경은 장시간 공부하는 데 도움이 됩니다."},
+        {word: "contingency plan", mean: "비상 대책", ex: "The company has a contingency plan in case the primary supplier fails to deliver.", trans: "회사는 주요 공급업체가 배송에 실패할 경우를 대비한 비상 대책을 가지고 있습니다."},
+        {word: "contrary to", mean: "~와는 반대로", ex: "Contrary to expectations, the movie was a huge success at the box office.", trans: "기대와는 반대로, 그 영화는 박스오피스에서 큰 성공을 거두었습니다."},
+        {word: "curtail", mean: "축소하다", ex: "The government decided to curtail spending on public infrastructure projects.", trans: "정부는 공공 인프라 프로젝트에 대한 지출을 축소하기로 결정했습니다."},
+        {word: "delegate", mean: "위임하다", ex: "A good manager knows how to delegate tasks effectively to their team members.", trans: "좋은 매니저는 팀원들에게 업무를 효과적으로 위임하는 방법을 압니다."},
+        {word: "deplete", mean: "고갈시키다", ex: "Years of overfarming have depleted the soil of its essential nutrients.", trans: "수년간의 과도한 농경으로 토양의 필수 영양소가 고갈되었습니다."},
+        {word: "designated", mean: "지정된", ex: "Please smoke only in the designated areas outside the building.", trans: "건물 밖의 지정된 구역에서만 흡연해 주시기 바랍니다."},
+        {word: "deterrent", mean: "억제책", ex: "Heavy fines serve as a deterrent to illegal parking in the city center.", trans: "무거운 벌금은 도심 내 불법 주차에 대한 억제책 역할을 합니다."},
+        {word: "detrimental", mean: "해로운", ex: "Lack of sleep can be detrimental to your physical and mental health.", trans: "수면 부족은 신체적, 정신적 건강에 해로울 수 있습니다."},
+        {word: "devote A to B", mean: "A를 B에 쏟다", ex: "He decided to devote all his energy to finishing the project on time.", trans: "그는 프로젝트를 제때 끝내기 위해 모든 에너지를 쏟기로 결심했습니다."},
+        {word: "discretion", mean: "재량", ex: "The manager has the discretion to offer discounts to loyal customers.", trans: "매니저는 단골 고객에게 할인을 제공할 재량이 있습니다."},
+        {word: "discretionary", mean: "자유 재량의", ex: "The committee has a discretionary fund for unexpected expenses.", trans: "위원회는 예기치 못한 비용을 위한 자유 재량 기금을 가지고 있습니다."},
+        {word: "discrepancy", mean: "불일치", ex: "The auditor found a discrepancy between the reported income and the bank records.", trans: "감사인은 보고된 수입과 은행 기록 간의 불일치를 발견했습니다."},
+        {word: "draw a conclusion", mean: "결론을 도출하다", ex: "We need more data before we can draw a conclusion from this experiment.", trans: "이 실험에서 결론을 도출하기 전에 더 많은 데이터가 필요합니다."},
+        {word: "efficiently", mean: "효율적으로", ex: "The new software will help the team work more efficiently on their daily tasks.", trans: "새 소프트웨어는 팀이 일상 업무를 더 효율적으로 처리하도록 도와줄 것입니다."},
+        {word: "eliminate", mean: "제거하다", ex: "The company plans to eliminate all unnecessary costs to improve profitability.", trans: "회사는 수익성을 높이기 위해 모든 불필요한 비용을 제거할 계획입니다."},
+        {word: "encompass", mean: "포함하다", ex: "The new training program will encompass all aspects of customer service.", trans: "새로운 교육 프로그램은 고객 서비스의 모든 측면을 포함할 것입니다."},
+        {word: "endorse", mean: "승인하다", ex: "The celebrity decided to endorse the new line of eco-friendly products.", trans: "그 유명 인사는 새로운 친환경 제품 라인을 승인(홍보)하기로 결정했습니다."},
+        {word: "erroneous", mean: "잘못된", ex: "The news report contained erroneous information about the incident.", trans: "그 뉴스 보고서에는 사건에 대한 잘못된 정보가 포함되어 있었습니다."},
+        {word: "excursion", mean: "짧은 여행", ex: "The students went on an excursion to the local science museum.", trans: "학생들은 현지 과학 박물관으로 짧은 여행을 떠났습니다."},
+        {word: "exquisite", mean: "정교한", ex: "The jewelry box was decorated with exquisite carvings and precious stones.", trans: "보석 상자는 정교한 조각과 보석으로 장식되어 있었습니다."},
+        {word: "facilitate", mean: "용이하게 하다", ex: "The new online system will facilitate communication between teachers and parents.", trans: "새로운 온라인 시스템은 교사와 학부모 사이의 의사소통을 용이하게 할 것입니다."},
+        {word: "familiarize with", mean: "~에 익숙해지다", ex: "New employees are required to familiarize themselves with the company’s policies.", trans: "신입 사원들은 회사의 정책에 익숙해져야 합니다."},
+        {word: "favorable", mean: "호의적인", ex: "The review of the new restaurant was very favorable, praising its food and service.", trans: "그 새 식당에 대한 리뷰는 음식과 서비스를 칭찬하며 매우 호의적이었습니다."},
+        {word: "feasibility", mean: "실연 가능성", ex: "The experts are conducting a study to determine the feasibility of the project.", trans: "전문가들은 프로젝트의 실현 가능성을 결정하기 위한 연구를 진행 중입니다."},
+        {word: "fluctuate", mean: "변동하다", ex: "Gas prices often fluctuate depending on the global supply of oil.", trans: "가스 가격은 종종 세계 석유 공급량에 따라 변동합니다."},
+        {word: "formidable", mean: "위협적인", ex: "The opposing team is a formidable opponent with a long winning streak.", trans: "상대 팀은 긴 연승 기록을 가진 위협적인 적수입니다."},
+        {word: "fragile", mean: "깨지기 쉬운", ex: "Please handle this package with care as it contains fragile glassware.", trans: "이 소포는 깨지기 쉬운 유리 제품을 포함하고 있으니 주의해서 다뤄 주십시오."},
+        {word: "galvanize", mean: "활력을 불어넣다", ex: "The leader's speech was designed to galvanize the crowd into action.", trans: "지도자의 연설은 군중이 행동하도록 활력을 불어넣기 위해 고안되었습니다."},
+        {word: "genuine", mean: "진짜의", ex: "The antique dealer confirmed that the painting was a genuine masterpiece.", trans: "골동품 상인은 그 그림이 진짜 걸작임을 확인했습니다."},
+        {word: "go into effect", mean: "효력을 발생하다", ex: "The new traffic regulations will go into effect starting next Monday.", trans: "새로운 교통 규정은 다음 주 월요일부터 효력을 발생할 것입니다."},
+        {word: "halt", mean: "중단하다", ex: "Production was temporarily halted due to a power outage at the factory.", trans: "공장의 정전으로 인해 생산이 일시적으로 중단되었습니다."},
+        {word: "haphazard", mean: "무계획적인", ex: "The books were arranged in a haphazard way on the shelves.", trans: "책들이 선반에 무계획적으로 배치되어 있었습니다."},
+        {word: "heed", mean: "주의를 기울이다", ex: "Drivers should heed the warning signs on the road during a storm.", trans: "운전자들은 폭풍우가 치는 동안 도로 위의 경고 표지판에 주의를 기울여야 합니다."},
+        {word: "hinder", mean: "방해하다", ex: "Heavy snow hindered the rescue efforts after the earthquake.", trans: "폭설이 지진 후 구조 작업을 방해했습니다."},
+        {word: "hospitality", mean: "환대", ex: "We were overwhelmed by the warm hospitality of the local people.", trans: "우리는 현지인들의 따뜻한 환대에 감동했습니다."},
+        {word: "impeccable", mean: "결점 없는", ex: "The pianist’s performance was impeccable, earning a standing ovation.", trans: "피아니스트의 연주는 결점 없었으며, 기립 박수를 받았습니다."},
+        {word: "imperative", mean: "필수적인", ex: "It is imperative that all safety procedures are followed strictly.", trans: "모든 안전 절차를 엄격히 따르는 것이 필수적입니다."},
+        {word: "vital", mean: "필수적인", ex: "Strong communication is vital for the success of any team.", trans: "강력한 의사소통은 모든 팀의 성공을 위해 필수적입니다."},
+        {word: "impending", mean: "임박한", ex: "The dark clouds in the sky suggested an impending storm.", trans: "하늘의 먹구름은 폭풍이 임박했음을 시사했습니다."},
+        {word: "imply", mean: "암시하다", ex: "His silence seemed to imply that he agreed with the proposal.", trans: "그의 침묵은 그가 제안에 동의한다는 것을 암시하는 것 같았습니다."},
+        {word: "in accordance with", mean: "~에 부합하여", ex: "The building was constructed in accordance with the latest safety standards.", trans: "건물은 최신 안전 기준에 부합하여 건설되었습니다."},
+        {word: "in conjunction with", mean: "~와 협력하여", ex: "The marketing campaign was launched in conjunction with the product release.", trans: "마케팅 캠페인은 제품 출시와 협력하여 시작되었습니다."},
+        {word: "in light of", mean: "~을 고려하여", ex: "The board decided to revise the budget in light of the recent financial losses.", trans: "이사회는 최근의 재정적 손실을 고려하여 예산을 수정하기로 결정했습니다."},
+        {word: "under consideration", mean: "고려 중인", ex: "Several candidates are still under consideration for the position.", trans: "여러 후보자가 여전히 그 직책을 위해 고려 중입니다."},
+        {word: "in the event of", mean: "~의 경우에", ex: "In the event of an emergency, please use the stairs instead of the elevator.", trans: "비상시에는 엘리베이터 대신 계단을 이용해 주십시오."},
+        {word: "incentive", mean: "장려책", ex: "The company offers a performance-based incentive to its sales team.", trans: "회사는 영업팀에 성과 기반 장려책을 제공합니다."},
+        {word: "incur", mean: "발생시키다", ex: "Any late payments will incur an additional fee of ten dollars.", trans: "지연 지불 시 10달러의 추가 비용이 발생할 것입니다."},
+        {word: "inherent", mean: "내재된", ex: "There are inherent risks involved in any new business venture.", trans: "어떠한 새로운 사업 벤처에도 내재된 위험이 수반됩니다."},
+        {word: "itinerary", mean: "여행 일정표", ex: "The travel agent provided us with a detailed itinerary for our trip to Europe.", trans: "여행사는 우리에게 유럽 여행을 위한 상세한 여행 일정표를 제공했습니다."},
+        {word: "jointly", mean: "공동으로", ex: "The two companies developed the new technology jointly over three years.", trans: "두 회사는 3년에 걸쳐 새로운 기술을 공동으로 개발했습니다."},
+        {word: "judicious", mean: "현명한", ex: "The manager made a judicious decision that saved the company from a crisis.", trans: "매니저는 회사를 위기에서 구한 현명한 결정을 내렸습니다."},
+        {word: "keen", mean: "열망하는", ex: "She is keen to start her new job and meet her colleagues.", trans: "그녀는 새 직장을 시작하고 동료들을 만나기를 열망하고 있습니다."},
+        {word: "keep in mind", mean: "명심하다", ex: "Please keep in mind that the office will be closed this Friday.", trans: "이번 주 금요일에 사무실이 문을 닫는다는 점을 명심해 주십시오."},
+        {word: "keep track of", mean: "~을 파악하다", ex: "The app helps users keep track of their daily expenses.", trans: "그 앱은 사용자들이 일일 지출을 파악하는 데 도움을 줍니다."},
+        {word: "keep up with", mean: "~을 따라잡다", ex: "It can be difficult to keep up with the fast-paced changes in technology.", trans: "빠르게 변하는 기술 변화를 따라잡는 것은 어려울 수 있습니다."},
+        {word: "legible", mean: "읽기 쉬운", ex: "Please make sure your handwriting is legible on the application form.", trans: "신청서의 글씨가 읽기 쉬운지 확인해 주십시오."},
+        {word: "leverage", mean: "활용하다", ex: "The company plans to leverage its strong brand name to enter new markets.", trans: "회사는 새로운 시장에 진출하기 위해 강력한 브랜드명을 활용할 계획입니다."},
+        {word: "take advantage of", mean: "~을 활용하다", ex: "You should take advantage of the free training sessions offered by the library.", trans: "도서관에서 제공하는 무료 교육 세션을 활용해야 합니다."},
+        {word: "utilize", mean: "활용하다", ex: "The team learned how to utilize the new software to streamline their work.", trans: "팀은 업무를 간소화하기 위해 새 소프트웨어를 활용하는 법을 배웠습니다."},
+        {word: "liaise", mean: "연락하다", ex: "The marketing department will liaise with the PR team on the new campaign.", trans: "마케팅 부서는 새로운 캠페인에 대해 홍보팀과 연락할 것입니다."},
+        {word: "lucid", mean: "명료한", ex: "The professor gave a lucid explanation of a very complex theory.", trans: "교수님은 매우 복잡한 이론에 대해 명료한 설명을 해주셨습니다."},
+        {word: "lucrative", mean: "수익성이 좋은", ex: "Selling high-end real estate can be a very lucrative business.", trans: "고급 부동산을 파는 것은 매우 수익성이 좋은 사업이 될 수 있습니다."},
+        {word: "mandatory", mean: "의무적인", ex: "Attendance at the safety workshop is mandatory for all lab employees.", trans: "모든 실험실 직원은 안전 워크숍 참석이 의무적입니다."},
+        {word: "manifest", mean: "나타내다", ex: "The symptoms of the disease began to manifest shortly after the infection.", trans: "질병의 증상은 감염 직후 나타나기 시작했습니다."},
+        {word: "moderate", mean: "적당한", ex: "The doctor advised him to engage in moderate exercise three times a week.", trans: "의사는 그에게 일주일에 세 번 적당한 운동을 하라고 조언했습니다."},
+        {word: "modification", mean: "수정", ex: "The engineers suggested several modifications to improve the car's fuel efficiency.", trans: "엔지니어들은 자동차의 연비를 높이기 위해 몇 가지 수정을 제안했습니다."},
+        {word: "noteworthy", mean: "주목할 만한", ex: "The museum’s collection includes several noteworthy works by famous artists.", trans: "박물관의 소장품에는 유명 작가들의 주목할 만한 작품이 여러 점 포함되어 있습니다."},
+        {word: "notify", mean: "통지하다", ex: "The hotel will notify guests if there are any changes to their reservation.", trans: "호텔은 예약에 변경 사항이 있을 경우 고객에게 통지할 것입니다."},
+        {word: "obsolete", mean: "구식의", ex: "Compact discs have become largely obsolete due to streaming services.", trans: "스트리밍 서비스로 인해 CD는 대체로 구식의 것이 되었습니다."},
+        {word: "on behalf of", mean: "~을 대신하여", ex: "The lawyer spoke on behalf of the client during the court hearing.", trans: "변호사는 법원 심리 동안 의뢰인을 대신하여 말했습니다."},
+        {word: "on short notice", mean: "갑작스럽게", ex: "She had to prepare a presentation on short notice for the meeting.", trans: "그녀는 회의를 위해 갑작스럽게 발표를 준비해야 했습니다."},
+        {word: "optimize", mean: "최적화하다", ex: "The engineers are working to optimize the performance of the new engine.", trans: "엔지니어들은 새로운 엔진의 성능을 최적화하기 위해 노력하고 있습니다."},
+        {word: "overhaul", mean: "점검하다", ex: "The airline decided to overhaul the entire fleet for safety reasons.", trans: "항공사는 안전상의 이유로 전체 항공기를 점검하기로 결정했습니다."},
+        {word: "oversee", mean: "감독하다", ex: "The manager will oversee the implementation of the new software system.", trans: "매니저는 새로운 소프트웨어 시스템의 구현을 감독할 것입니다."},
+        {word: "pave", mean: "(길을) 닦다", ex: "The workers will pave the new driveway with asphalt next week.", trans: "작업자들은 다음 주에 새 진입로를 아스팔트로 닦을 것입니다."},
+        {word: "pending", mean: "미결의", ex: "The application is still pending approval from the local council.", trans: "신청서는 여전히 지방 의회의 승인을 기다리는 미결 상태입니다."},
+        {word: "perpetual", mean: "영구적인", ex: "The region is known for its perpetual rain during the spring season.", trans: "그 지역은 봄 시즌 동안의 영구적인(끊임없는) 비로 유명합니다."},
+        {word: "point of contact", mean: "연락 담당자", ex: "Please use the office manager as your primary point of contact.", trans: "사무실 매니저를 주요 연락 담당자로 이용해 주십시오."},
+        {word: "precarious", mean: "불안정한", ex: "The climber was in a precarious position on the edge of the cliff.", trans: "등반가는 절벽 끝의 불안정한 위치에 있었습니다."},
+        {word: "precaution", mean: "예방 조치", ex: "Wearing a helmet is a necessary precaution when riding a bicycle.", trans: "헬멧을 착용하는 것은 자전거를 탈 때 필요한 예방 조치입니다."},
+        {word: "preliminary", mean: "예비의", ex: "The researchers published their preliminary findings in a scientific journal.", trans: "연구원들은 그들의 예비 연구 결과를 과학 저널에 발표했습니다."},
+        {word: "prerequisite", mean: "전제 조건", ex: "Completion of the introductory course is a prerequisite for the advanced class.", trans: "입문 과정 완료는 상급 반을 위한 전제 조건입니다."},
+        {word: "prior to", mean: "~보다 앞서", ex: "Please submit your reports at least two days prior to the meeting.", trans: "회의보다 적어도 이틀 앞서 보고서를 제출해 주십시오."},
+        {word: "promptly", mean: "즉시", ex: "The emergency services arrived promptly at the scene of the accident.", trans: "비상 서비스팀이 사고 현장에 즉시 도착했습니다."},
+        {word: "prosperous", mean: "번영하는", ex: "The small town grew into a prosperous city thanks to its local industry.", trans: "그 작은 마을은 지역 산업 덕분에 번영하는 도시로 성장했습니다."},
+        {word: "provisional estimate", mean: "임시 견적", ex: "The contractor gave us a provisional estimate for the kitchen renovation.", trans: "계약업자는 우리에게 주방 개조를 위한 임시 견적을 주었습니다."},
+        {word: "reimburse", mean: "환급하다", ex: "The company will reimburse all travel expenses related to the business trip.", trans: "회사는 출장과 관련된 모든 여행 경비를 환급할 것입니다."},
+        {word: "refrain from", mean: "~을 자제하다", ex: "Please refrain from talking loudly in the library.", trans: "도서관 내에서 큰 소리로 말하는 것을 자제해 주십시오."},
+        {word: "reluctant", mean: "꺼리는", ex: "He was reluctant to share his personal information with strangers.", trans: "그는 낯선 사람과 개인 정보를 공유하는 것을 꺼렸습니다."},
+        {word: "resilient", mean: "회복력 있는", ex: "Despite the setbacks, the team remained resilient and kept working hard.", trans: "좌절에도 불구하고, 팀은 회복력 있게 계속 열심히 노력했습니다."},
+        {word: "retrieve", mean: "검색하다", ex: "The database allows users to retrieve information quickly and easily.", trans: "데이터베이스는 사용자가 정보를 빠르고 쉽게 검색할 수 있게 해줍니다."},
+        {word: "scrupulous", mean: "꼼꼼한", ex: "The accountant was very scrupulous in keeping the financial records.", trans: "회계사는 재정 기록을 유지하는 데 매우 꼼꼼했습니다."},
+        {word: "scrutinize", mean: "면밀히 조사하다", ex: "The investigators will scrutinize the documents for any signs of fraud.", trans: "조사관들은 사기의 징후가 있는지 문서를 면밀히 조사할 것입니다."},
+        {word: "stagnant", mean: "정체된", ex: "The company’s sales have remained stagnant for the past three years.", trans: "회사의 매출은 지난 3년 동안 정체된 상태를 유지해 왔습니다."},
+        {word: "stem from", mean: "~에서 기인하다", ex: "Many health problems stem from a lack of physical activity.", trans: "많은 건강 문제는 신체 활동 부족에서 기인합니다."},
+        {word: "stipulate", mean: "규정하다", ex: "The contract stipulates that the work must be completed by December.", trans: "계약서는 작업이 12월까지 완료되어야 한다고 규정하고 있습니다."},
+        {word: "stringent", mean: "엄격한", ex: "The airport has introduced stringent security measures for all passengers.", trans: "공항은 모든 승객을 위해 엄격한 보안 조치를 도입했습니다."},
+        {word: "sturdy", mean: "튼튼한", ex: "The hikers wore sturdy boots to protect their feet on the rocky trail.", trans: "등산객들은 바위가 많은 길에서 발을 보호하기 위해 튼튼한 부츠를 신었습니다."},
+        {word: "subsequent", mean: "차후의", ex: "The first experiment failed, but subsequent trials were more successful.", trans: "첫 번째 실험은 실패했지만, 차후의 실험들은 더 성공적이었습니다."},
+        {word: "take precedence", mean: "우선권을 갖다", ex: "Safety must take precedence over speed when completing the project.", trans: "프로젝트를 완료할 때 안전이 속도보다 우선권을 가져야 합니다."},
+        {word: "tedious", mean: "지루한", ex: "The task of entering data into the spreadsheet was very tedious.", trans: "스프레드시트에 데이터를 입력하는 작업은 매우 지루했습니다."},
+        {word: "temporarily", mean: "일시적으로", ex: "The website will be temporarily unavailable due to maintenance.", trans: "점검으로 인해 웹사이트를 일시적으로 이용할 수 없습니다."},
+        {word: "tentatively", mean: "잠정적으로", ex: "The next meeting is tentatively scheduled for next Friday.", trans: "다음 회의는 잠정적으로 다음 주 금요일로 예정되어 있습니다."},
+        {word: "terminate", mean: "종료하다", ex: "The company decided to terminate the contract early.", trans: "회사는 계약을 조기 종료하기로 결정했습니다."},
+        {word: "unanimous", mean: "만장일치의", ex: "The committee reached a unanimous decision on the new budget.", trans: "위원회는 새로운 예산안에 대해 만장일치로 결정을 내렸습니다."},
+        {word: "unprecedented", mean: "전례 없는", ex: "The company saw unprecedented growth in sales this year.", trans: "회사는 올해 매출에서 전례 없는 성장을 기록했습니다."},
+        {word: "unravel", mean: "해결하다", ex: "The team worked hard to unravel the complex technical issue.", trans: "팀은 복잡한 기술적 문제를 해결하기 위해 열심히 일했습니다."},
+        {word: "validity", mean: "유효성", ex: "Please confirm the validity of your license before it expires.", trans: "면허가 만료되기 전에 유효성을 확인해 주십시오."},
+        {word: "verify", mean: "확인하다", ex: "The system will verify your identity using a security code.", trans: "시스템이 보안 코드를 사용하여 귀하의 신원을 확인합니다."},
+        {word: "versatile", mean: "다재다능한", ex: "This versatile tool can be used for many different tasks.", trans: "이 다재다능한 도구는 여러 가지 다양한 작업에 사용될 수 있습니다."},
+        {word: "vigilant", mean: "경계하는", ex: "We must remain vigilant against any possible security threats.", trans: "우리는 가능한 보안 위협에 대해 항상 경계해야 합니다."},
+        {word: "volatile", mean: "변동이 심한", ex: "The stock market can be quite volatile, so investors should be cautious.", trans: "주식 시장은 상당히 변동이 심할 수 있으므로 투자자들은 주의해야 합니다."},
+        {word: "withstand", mean: "견디다", ex: "The building was designed to withstand strong winds and earthquakes.", trans: "그 건물은 강풍과 지진을 견디도록 설계되었습니다."},
+        {word: "yield", mean: "산출하다", ex: "The new farming techniques have yielded a much higher crop than last year.", trans: "새로운 농사 기법은 작년보다 훨씬 더 높은 작물을 산출했습니다."}
     ];
 
     let words = defaultWords;
@@ -169,14 +271,20 @@
     function showQuestion() {
         const q = testQueue[currentIndex];
         document.getElementById('question-info').innerText = `문제 ${currentIndex + 1} / ${testQueue.length}`;
-        document.getElementById('question-text').innerText = (q.questionType === 'toEng') ? q.mean : q.word;
-
+        
         if (quizMethod === 'input') {
+            document.getElementById('question-text').innerText = (q.questionType === 'toEng') ? q.mean : q.word;
+            document.getElementById('question-translation').innerText = "";
             document.getElementById('input-mode').style.display = 'block';
             document.getElementById('choice-mode').style.display = 'none';
             document.getElementById('answerInput').value = '';
             document.getElementById('answerInput').focus();
         } else {
+            // [객관식 모드] 예문 빈칸 문제로 변경
+            const blankedSentence = q.ex.replace(new RegExp(q.word, 'gi'), " ( ________ ) ");
+            document.getElementById('question-text').innerText = blankedSentence;
+            document.getElementById('question-translation').innerText = q.trans;
+            
             document.getElementById('input-mode').style.display = 'none';
             document.getElementById('choice-mode').style.display = 'grid';
             generateChoices(q);
@@ -185,10 +293,10 @@
 
     function generateChoices(correctWord) {
         const container = document.getElementById('choice-mode');
-        let choices = [correctWord.mean];
+        let choices = [correctWord.word];
         while (choices.length < 4) {
-            let randomMean = words[Math.floor(Math.random() * words.length)].mean;
-            if (!choices.includes(randomMean)) choices.push(randomMean);
+            let randomWord = words[Math.floor(Math.random() * words.length)].word;
+            if (!choices.includes(randomWord)) choices.push(randomWord);
         }
         choices.sort(() => Math.random() - 0.5);
         container.innerHTML = choices.map(c => 
@@ -198,13 +306,13 @@
 
     function checkChoiceAnswer(selected) {
         const q = testQueue[currentIndex];
-        if (selected === q.mean) {
+        if (selected === q.word) {
             alert("정답입니다! ✨");
             correctCount++;
-            wrongToKor = wrongToKor.filter(id => id !== q.originalId);
+            wrongToEng = wrongToEng.filter(id => id !== q.originalId);
         } else {
-            alert(`오답입니다! ❌\n정답: ${q.mean}`);
-            if (!wrongToKor.includes(q.originalId)) wrongToKor.push(q.originalId);
+            alert(`오답입니다! ❌\n정답: ${q.word}\n${q.mean}`);
+            if (!wrongToEng.includes(q.originalId)) wrongToEng.push(q.originalId);
         }
         saveAndNext();
     }
