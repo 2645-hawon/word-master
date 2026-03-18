@@ -10,7 +10,7 @@
         .btn-group { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 20px; }
         button { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .btn-test { background: #4a90e2; color: white; }
-        .btn-choice { background: #2ecc71; color: white; } /* 객관식 버튼 */
+        .btn-choice { background: #2ecc71; color: white; }
         .btn-wrong { background: #e67e22; color: white; }
         .btn-reset { background: #95a5a6; color: white; }
         .btn-mix { background: #9b59b6; color: white; }
@@ -20,18 +20,16 @@
         #question-text { font-size: 1.6em; margin: 20px 0; color: #2c3e50; font-weight: bold; line-height: 1.6; word-break: keep-all; }
         #question-translation { font-size: 1.1em; color: #7f8c8d; margin-bottom: 20px; }
         
-        /* 주관식 입력 */
         #input-mode { margin-bottom: 15px; }
         input[type="text"] { width: 80%; padding: 12px; font-size: 1.2em; border: 2px solid #ddd; border-radius: 8px; outline-color: #4a90e2; }
         
-        /* 객관식 보기 */
         #choice-mode { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
         .choice-btn { padding: 15px; background: #f8f9fa; border: 2px solid #dee2e6; border-radius: 10px; font-size: 1.1em; cursor: pointer; transition: 0.2s; }
         .choice-btn:hover { background: #e9ecef; border-color: #4a90e2; }
 
         .word-item { padding: 10px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
         .is-incorrect { background-color: #fff5f5; color: #e74c3c; }
-        .badge { background: #e74c3c; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; }
+        .badge { background: #e74c3c; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 5px; }
         .config-area { text-align: center; margin-bottom: 20px; padding: 15px; background: #edf2f7; border-radius: 10px; }
         .config-area input { width: 60px; padding: 5px; border-radius: 5px; border: 1px solid #cbd5e0; text-align: center; font-weight: bold; }
     </style>
@@ -51,7 +49,7 @@
         <button class="btn-test" onclick="startTest('toKor', 'input')">영어 → 뜻(쓰기)</button>
         <button class="btn-choice" onclick="startTest('toEng', 'choice')">객관식 (예문 빈칸)</button>
         <button class="btn-mix" onclick="startTest('mix', 'input')">랜덤 혼합 주관식</button>
-        <button class="btn-wrong" onclick="startTest('toEng', 'input', true)">오답 주관식</button>
+        <button class="btn-wrong" onclick="startTest('onlyWrong', 'input', true)">오답 맞춤 주관식</button>
         <button class="btn-reset" onclick="resetIncorrect()">오답 초기화</button>
     </div>
 
@@ -239,29 +237,48 @@
         const container = document.getElementById('list-container');
         document.getElementById('word-count').innerText = words.length;
         container.innerHTML = words.map((w, i) => {
-            const isWrong = wrongToEng.includes(i) || wrongToKor.includes(i);
-            return `<div class="word-item ${isWrong ? 'is-incorrect' : ''}">
+            const isEngWrong = wrongToEng.includes(i);
+            const isKorWrong = wrongToKor.includes(i);
+            return `<div class="word-item ${isEngWrong || isKorWrong ? 'is-incorrect' : ''}">
                 <span><strong>${i+1}. ${w.word}</strong> : ${w.mean}</span>
-                ${isWrong ? '<span class="badge">오답기록</span>' : ''}
+                <span class="badge-container">
+                    ${isEngWrong ? '<span class="badge">영어오답</span>' : ''}
+                    ${isKorWrong ? '<span class="badge">뜻오답</span>' : ''}
+                </span>
             </div>`;
         }).join('');
     }
 
     function startTest(type, method, onlyWrong) {
-        let indices = onlyWrong 
-            ? [...new Set([...wrongToEng, ...wrongToKor])]
-            : words.map((_, i) => i);
-            
-        if (indices.length === 0) return alert("시험볼 단어가 없습니다!");
+        let selected = [];
         
-        const limit = parseInt(document.getElementById('testCount').value) || indices.length;
-        let selected = indices.sort(() => Math.random() - 0.5).slice(0, limit);
+        if (onlyWrong) {
+            // 오답 맞춤 모드: 틀린 유형별로 문제 생성
+            let tempQueue = [];
+            wrongToEng.forEach(id => tempQueue.push({id: id, type: 'toEng'}));
+            wrongToKor.forEach(id => tempQueue.push({id: id, type: 'toKor'}));
+            
+            if (tempQueue.length === 0) return alert("오답 기록이 없습니다!");
+            
+            // 중복 제거 및 섞기 (한 단어가 두 유형 다 틀렸을 경우 대비)
+            selected = tempQueue.sort(() => Math.random() - 0.5);
+        } else {
+            // 일반 모드
+            let indices = words.map((_, i) => i);
+            const limit = parseInt(document.getElementById('testCount').value) || indices.length;
+            let shuffledIndices = indices.sort(() => Math.random() - 0.5).slice(0, limit);
+            selected = shuffledIndices.map(id => {
+                let finalType = type === 'mix' ? (Math.random() > 0.5 ? 'toEng' : 'toKor') : type;
+                return {id: id, type: finalType};
+            });
+        }
         
         quizMethod = method;
-        testQueue = selected.map(id => {
-            let finalType = type === 'mix' ? (Math.random() > 0.5 ? 'toEng' : 'toKor') : type;
-            return {...words[id], originalId: id, questionType: finalType};
-        });
+        testQueue = selected.map(item => ({
+            ...words[item.id], 
+            originalId: item.id, 
+            questionType: item.type
+        }));
 
         currentIndex = 0; correctCount = 0;
         document.getElementById('test-area').style.display = 'block';
@@ -270,7 +287,7 @@
 
     function showQuestion() {
         const q = testQueue[currentIndex];
-        document.getElementById('question-info').innerText = `문제 ${currentIndex + 1} / ${testQueue.length}`;
+        document.getElementById('question-info').innerText = `문제 ${currentIndex + 1} / ${testQueue.length} [${q.questionType === 'toEng' ? '영어쓰기' : '뜻쓰기'}]`;
         
         if (quizMethod === 'input') {
             document.getElementById('question-text').innerText = (q.questionType === 'toEng') ? q.mean : q.word;
@@ -280,87 +297,110 @@
             document.getElementById('answerInput').value = '';
             document.getElementById('answerInput').focus();
         } else {
-            // [객관식 모드] 예문 빈칸 문제로 변경
             const blankedSentence = q.ex.replace(new RegExp(q.word, 'gi'), " ( ________ ) ");
             document.getElementById('question-text').innerText = blankedSentence;
             document.getElementById('question-translation').innerText = q.trans;
-            
             document.getElementById('input-mode').style.display = 'none';
             document.getElementById('choice-mode').style.display = 'grid';
             generateChoices(q);
         }
     }
 
-    function generateChoices(correctWord) {
-        const container = document.getElementById('choice-mode');
-        let choices = [correctWord.word];
+    function generateChoices(correctQ) {
+        const choiceArea = document.getElementById('choice-mode');
+        choiceArea.innerHTML = '';
+        let choices = [correctQ.word];
+        let allWords = words.map(w => w.word);
         while (choices.length < 4) {
-            let randomWord = words[Math.floor(Math.random() * words.length)].word;
+            let randomWord = allWords[Math.floor(Math.random() * allWords.length)];
             if (!choices.includes(randomWord)) choices.push(randomWord);
         }
         choices.sort(() => Math.random() - 0.5);
-        container.innerHTML = choices.map(c => 
-            `<button class="choice-btn" onclick="checkChoiceAnswer('${c}')">${c}</button>`
-        ).join('');
+        choices.forEach(choice => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = choice;
+            btn.onclick = () => checkChoiceAnswer(choice, correctQ.word);
+            choiceArea.appendChild(btn);
+        });
     }
 
-    function checkChoiceAnswer(selected) {
+    function checkChoiceAnswer(selected, correct) {
         const q = testQueue[currentIndex];
-        if (selected === q.word) {
-            alert("정답입니다! ✨");
+        if (selected === correct) {
+            alert("정답입니다! 🎉");
             correctCount++;
-            wrongToEng = wrongToEng.filter(id => id !== q.originalId);
+            removeIncorrect(q.originalId, q.questionType);
         } else {
-            alert(`오답입니다! ❌\n정답: ${q.word}\n${q.mean}`);
-            if (!wrongToEng.includes(q.originalId)) wrongToEng.push(q.originalId);
+            alert(`오답입니다. 😢\n정답: ${correct}\n뜻: ${q.mean}`);
+            saveIncorrect(q.originalId, q.questionType);
         }
-        saveAndNext();
+        nextQuestion();
     }
 
     function checkAnswer() {
         const q = testQueue[currentIndex];
-        const input = document.getElementById('answerInput').value.trim().toLowerCase();
-        let isCorrect = false;
+        const userInput = document.getElementById('answerInput').value.trim().toLowerCase();
+        const correctAnswer = (q.questionType === 'toEng' ? q.word : q.mean).toLowerCase();
 
-        if (q.questionType === 'toEng') {
-            isCorrect = (input === q.word.toLowerCase());
-            if (isCorrect) wrongToEng = wrongToEng.filter(id => id !== q.originalId);
-            else if (!wrongToEng.includes(q.originalId)) wrongToEng.push(q.originalId);
+        if (userInput === correctAnswer) {
+            alert("정답입니다! 🎉");
+            correctCount++;
+            removeIncorrect(q.originalId, q.questionType);
         } else {
-            const correctMeans = q.mean.split(/[,/]/).map(s => s.trim());
-            isCorrect = correctMeans.some(m => input === m || input === m.replace(/\s/g, ''));
-            if (isCorrect) wrongToKor = wrongToKor.filter(id => id !== q.originalId);
-            else if (!wrongToKor.includes(q.originalId)) wrongToKor.push(q.originalId);
+            alert(`오답입니다. 😢\n정답: ${correctAnswer}`);
+            saveIncorrect(q.originalId, q.questionType);
         }
-
-        if (isCorrect) { alert("정답입니다! ✨"); correctCount++; }
-        else { alert(`오답입니다! ❌\n정답: ${q.questionType === 'toEng' ? q.word : q.mean}`); }
-        saveAndNext();
+        nextQuestion();
     }
 
-    function saveAndNext() {
-        localStorage.setItem('wrong_voca_eng', JSON.stringify(wrongToEng));
-        localStorage.setItem('wrong_voca_kor', JSON.stringify(wrongToKor));
+    function nextQuestion() {
         currentIndex++;
-        if (currentIndex < testQueue.length) showQuestion();
-        else {
-            const score = Math.round((correctCount / testQueue.length) * 100);
-            alert(`시험 종료!\n🎯 점수: ${score}점 (${correctCount}/${testQueue.length})`);
+        if (currentIndex < testQueue.length) {
+            showQuestion();
+        } else {
+            alert(`시험 종료!\n결과: ${correctCount} / ${testQueue.length} 맞힘`);
             document.getElementById('test-area').style.display = 'none';
             renderList();
         }
     }
 
-    function resetIncorrect() {
-        if(confirm("오답 기록을 초기화할까요?")) {
-            wrongToEng = []; wrongToKor = [];
-            localStorage.setItem('wrong_voca_eng', '[]');
-            localStorage.setItem('wrong_voca_kor', '[]');
-            renderList();
+    function saveIncorrect(id, type) {
+        if (type === 'toEng') {
+            if (!wrongToEng.includes(id)) {
+                wrongToEng.push(id);
+                localStorage.setItem('wrong_voca_eng', JSON.stringify(wrongToEng));
+            }
+        } else {
+            if (!wrongToKor.includes(id)) {
+                wrongToKor.push(id);
+                localStorage.setItem('wrong_voca_kor', JSON.stringify(wrongToKor));
+            }
         }
     }
 
-    renderList();
+    function removeIncorrect(id, type) {
+        // 맞혔을 때 해당 유형 오답 목록에서 제거 (선택 사항)
+        if (type === 'toEng') {
+            wrongToEng = wrongToEng.filter(i => i !== id);
+            localStorage.setItem('wrong_voca_eng', JSON.stringify(wrongToEng));
+        } else {
+            wrongToKor = wrongToKor.filter(i => i !== id);
+            localStorage.setItem('wrong_voca_kor', JSON.stringify(wrongToKor));
+        }
+    }
+
+    function resetIncorrect() {
+        if(confirm("모든 오답 기록을 삭제하시겠습니까?")) {
+            wrongToEng = []; wrongToKor = [];
+            localStorage.removeItem('wrong_voca_eng');
+            localStorage.removeItem('wrong_voca_kor');
+            renderList();
+            alert("초기화되었습니다.");
+        }
+    }
+
+    window.onload = renderList;
 </script>
 </body>
 </html>
