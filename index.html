@@ -11,6 +11,7 @@
         button { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .btn-test { background: #4a90e2; color: white; }
         .btn-choice { background: #2ecc71; color: white; }
+        .btn-ex-input { background: #3498db; color: white; } /* 예문 주관식 버튼 색상 */
         .btn-wrong { background: #e67e22; color: white; }
         .btn-reset { background: #95a5a6; color: white; }
         .btn-mix { background: #9b59b6; color: white; }
@@ -48,6 +49,7 @@
         <button class="btn-test" onclick="startTest('toEng', 'input')">뜻 → 영어(쓰기)</button>
         <button class="btn-test" onclick="startTest('toKor', 'input')">영어 → 뜻(쓰기)</button>
         <button class="btn-choice" onclick="startTest('toEng', 'choice')">객관식 (예문 빈칸)</button>
+        <button class="btn-ex-input" onclick="startTest('toEng', 'ex-input')">주관식 (예문 빈칸)</button>
         <button class="btn-mix" onclick="startTest('mix', 'input')">랜덤 혼합 주관식</button>
         <button class="btn-wrong" onclick="startTest('onlyWrong', 'input', true)">오답 맞춤 주관식</button>
         <button class="btn-reset" onclick="resetIncorrect()">오답 초기화</button>
@@ -207,7 +209,7 @@
         {word: "stagnant", mean: "정체된", ex: "The company’s sales have remained stagnant for the past three years.", trans: "회사의 매출은 지난 3년 동안 정체된 상태를 유지해 왔습니다."},
         {word: "stem from", mean: "~에서 기인하다", ex: "Many health problems stem from a lack of physical activity.", trans: "많은 건강 문제는 신체 활동 부족에서 기인합니다."},
         {word: "stipulate", mean: "규정하다", ex: "The contract stipulates that the work must be completed by December.", trans: "계약서는 작업이 12월까지 완료되어야 한다고 규정하고 있습니다."},
-        {word: "stringent", mean: "엄격한", ex: "The airport has introduced stringent security measures for all passengers.", trans: "공항은 모든 승객을 위해 엄격한 보안 조치를 도입했습니다."},
+        {word: "stringent", mean: "엄격한", ex: "The airport has introduced stringent security measures for all passengers.", trans: "공항은 모든 승객을 위해 엄격히 보안 조치를 도입했습니다."},
         {word: "sturdy", mean: "튼튼한", ex: "The hikers wore sturdy boots to protect their feet on the rocky trail.", trans: "등산객들은 바위가 많은 길에서 발을 보호하기 위해 튼튼한 부츠를 신었습니다."},
         {word: "subsequent", mean: "차후의", ex: "The first experiment failed, but subsequent trials were more successful.", trans: "첫 번째 실험은 실패했지만, 차후의 실험들은 더 성공적이었습니다."},
         {word: "take precedence", mean: "우선권을 갖다", ex: "Safety must take precedence over speed when completing the project.", trans: "프로젝트를 완료할 때 안전이 속도보다 우선권을 가져야 합니다."},
@@ -253,17 +255,12 @@
         let selected = [];
         
         if (onlyWrong) {
-            // 오답 맞춤 모드: 틀린 유형별로 문제 생성
             let tempQueue = [];
             wrongToEng.forEach(id => tempQueue.push({id: id, type: 'toEng'}));
             wrongToKor.forEach(id => tempQueue.push({id: id, type: 'toKor'}));
-            
             if (tempQueue.length === 0) return alert("오답 기록이 없습니다!");
-            
-            // 중복 제거 및 섞기 (한 단어가 두 유형 다 틀렸을 경우 대비)
             selected = tempQueue.sort(() => Math.random() - 0.5);
         } else {
-            // 일반 모드
             let indices = words.map((_, i) => i);
             const limit = parseInt(document.getElementById('testCount').value) || indices.length;
             let shuffledIndices = indices.sort(() => Math.random() - 0.5).slice(0, limit);
@@ -287,16 +284,30 @@
 
     function showQuestion() {
         const q = testQueue[currentIndex];
-        document.getElementById('question-info').innerText = `문제 ${currentIndex + 1} / ${testQueue.length} [${q.questionType === 'toEng' ? '영어쓰기' : '뜻쓰기'}]`;
+        let modeName = "";
+        if(quizMethod === 'input') modeName = q.questionType === 'toEng' ? '영어쓰기' : '뜻쓰기';
+        else if(quizMethod === 'choice') modeName = '객관식(예문)';
+        else if(quizMethod === 'ex-input') modeName = '주관식(예문 빈칸)';
+
+        document.getElementById('question-info').innerText = `문제 ${currentIndex + 1} / ${testQueue.length} [${modeName}]`;
         
-        if (quizMethod === 'input') {
-            document.getElementById('question-text').innerText = (q.questionType === 'toEng') ? q.mean : q.word;
-            document.getElementById('question-translation').innerText = "";
+        if (quizMethod === 'input' || quizMethod === 'ex-input') {
+            // [입력 모드] (단순 쓰기 또는 예문 빈칸 쓰기)
+            if(quizMethod === 'ex-input') {
+                const blankedSentence = q.ex.replace(new RegExp(q.word, 'gi'), " ( ________ ) ");
+                document.getElementById('question-text').innerText = blankedSentence;
+                document.getElementById('question-translation').innerText = q.trans;
+            } else {
+                document.getElementById('question-text').innerText = (q.questionType === 'toEng') ? q.mean : q.word;
+                document.getElementById('question-translation').innerText = "";
+            }
+            
             document.getElementById('input-mode').style.display = 'block';
             document.getElementById('choice-mode').style.display = 'none';
             document.getElementById('answerInput').value = '';
             document.getElementById('answerInput').focus();
         } else {
+            // [객관식 모드]
             const blankedSentence = q.ex.replace(new RegExp(q.word, 'gi'), " ( ________ ) ");
             document.getElementById('question-text').innerText = blankedSentence;
             document.getElementById('question-translation').innerText = q.trans;
@@ -341,14 +352,18 @@
     function checkAnswer() {
         const q = testQueue[currentIndex];
         const userInput = document.getElementById('answerInput').value.trim().toLowerCase();
-        const correctAnswer = (q.questionType === 'toEng' ? q.word : q.mean).toLowerCase();
+        
+        // 예문 주관식일 때는 항상 영어 단어가 정답임
+        const correctAnswer = (quizMethod === 'ex-input' || q.questionType === 'toEng') 
+                                ? q.word.toLowerCase() 
+                                : q.mean.toLowerCase();
 
         if (userInput === correctAnswer) {
             alert("정답입니다! 🎉");
             correctCount++;
             removeIncorrect(q.originalId, q.questionType);
         } else {
-            alert(`오답입니다. 😢\n정답: ${correctAnswer}`);
+            alert(`오답입니다. 😢\n정답: ${correctAnswer}\n뜻: ${q.mean}`);
             saveIncorrect(q.originalId, q.questionType);
         }
         nextQuestion();
@@ -380,7 +395,6 @@
     }
 
     function removeIncorrect(id, type) {
-        // 맞혔을 때 해당 유형 오답 목록에서 제거 (선택 사항)
         if (type === 'toEng') {
             wrongToEng = wrongToEng.filter(i => i !== id);
             localStorage.setItem('wrong_voca_eng', JSON.stringify(wrongToEng));
