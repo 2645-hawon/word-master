@@ -2,235 +2,210 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>2026 단어왕 실전 테스트 (No Hints)</title>
+    <title>2026 단어왕 150 실전 테스트</title>
     <style>
-        body { font-family: 'Pretendard', sans-serif; background: #f8f9fa; display: flex; justify-content: center; padding: 20px; }
-        .exam-card { background: white; width: 100%; max-width: 650px; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #2d3436; margin-bottom: 40px; }
-        .stats { text-align: right; color: #a0a0a0; font-size: 0.9em; margin-bottom: 15px; font-weight: 500; }
-        
-        #question-box { min-height: 140px; display: flex; align-items: center; justify-content: center; text-align: center; margin-bottom: 40px; background: #fff; border-bottom: 2px solid #f1f2f6; }
-        #question-text { font-size: 1.6em; font-weight: 700; color: #2d3436; line-height: 1.5; word-break: keep-all; }
-        
-        .options-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        .opt-btn { 
-            padding: 20px; border: 2px solid #edeff2; border-radius: 15px; background: white; 
-            font-size: 1.15em; text-align: left; cursor: pointer; transition: 0.2s; color: #2d3436; font-weight: 500;
-        }
-        .opt-btn:hover { border-color: #4a90e2; background: #f0f7ff; color: #4a90e2; }
-        
+        body { font-family: 'Pretendard', sans-serif; background: #f4f7f6; display: flex; justify-content: center; padding: 20px; }
+        .exam-card { background: white; width: 100%; max-width: 650px; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        h2 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        .stats { display: flex; justify-content: space-between; color: #95a5a6; font-size: 0.9em; margin-bottom: 15px; }
+        #question-box { min-height: 140px; display: flex; align-items: center; justify-content: center; text-align: center; margin-bottom: 30px; padding: 20px; background: #fafafa; border-radius: 15px; }
+        #question-text { font-size: 1.6em; font-weight: 700; color: #34495e; line-height: 1.5; word-break: keep-all; }
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        .opt-btn { padding: 18px; border: 2px solid #ecf0f1; border-radius: 12px; background: white; font-size: 1.1em; text-align: left; cursor: pointer; transition: 0.2s; color: #2c3e50; }
+        .opt-btn:hover { border-color: #3498db; background: #f7fbff; color: #3498db; }
         #input-box { display: none; }
-        #answer-input { 
-            width: 100%; padding: 18px; font-size: 1.4em; border: 2px solid #edeff2; 
-            border-radius: 15px; outline: none; text-align: center; margin-bottom: 20px; box-sizing: border-box;
-        }
-        
-        .start-menu { text-align: center; }
-        .btn { padding: 15px 30px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; font-size: 1em; }
-        .btn-blue { background: #4a90e2; color: white; width: 100%; margin-bottom: 10px; }
-        .btn-green { background: #2ecc71; color: white; width: 100%; }
-        
-        /* 알림창 스타일링 */
-        .wrong-alert { color: #e74c3c; font-weight: bold; margin-top: 10px; }
+        #answer-input { width: 100%; padding: 15px; font-size: 1.3em; border: 2px solid #ecf0f1; border-radius: 12px; outline: none; text-align: center; margin-bottom: 15px; box-sizing: border-box; }
+        .btn { padding: 15px 25px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; width: 100%; margin-bottom: 10px; font-size: 1em; }
+        .btn-blue { background: #3498db; color: white; }
+        .btn-green { background: #2ecc71; color: white; }
     </style>
 </head>
 <body>
-
 <div class="exam-card">
-    <div id="setup-view" class="start-menu">
-        <h2>🏆 2026 단어왕 실전 모드</h2>
-        <p style="color:#636e72; margin-bottom: 30px;">한국어 해석 힌트가 제거된 버전입니다.</p>
-        <div style="margin-bottom: 30px;">
-            문제 수 설정: <input type="number" id="qCount" value="20" style="width:60px; padding:8px; border-radius:5px; border:1px solid #ddd; text-align:center;">
+    <div id="setup-view" style="text-align:center;">
+        <h2>🏆 단어왕 150 실전 모드</h2>
+        <p style="color:#7f8c8d; margin-bottom:30px;">파일에 수록된 150개 단어로 시험을 생성합니다.</p>
+        <div style="margin-bottom:25px;">
+            문제 수: <input type="number" id="qCount" value="20" min="1" max="150" style="width:60px; padding:8px; text-align:center;">
         </div>
-        <button class="btn btn-blue" onclick="start('toEng')">뜻 → 영어 (객관식)</button>
-        <button class="btn btn-blue" onclick="start('toKor')">영어 → 뜻 (객관식)</button>
-        <button class="btn btn-green" onclick="start('ex')">예문 빈칸 채우기 (주관식)</button>
+        <button class="btn btn-blue" onclick="start('toEng')">뜻 → 영어</button>
+        <button class="btn btn-blue" onclick="start('toKor')">영어 → 뜻</button>
+        <button class="btn btn-green" onclick="start('ex')">예문 빈칸 (주관식)</button>
     </div>
 
     <div id="test-view" style="display:none;">
-        <div class="stats" id="progress-text">1 / 20</div>
-        <div id="question-box">
-            <div id="question-text"></div>
+        <div class="stats">
+            <span id="progress-text">1 / 20</span>
+            <span id="score-text">맞은 개수: 0</span>
         </div>
-        
+        <div id="question-box"><div id="question-text"></div></div>
         <div id="options-area" class="options-grid"></div>
-        
         <div id="input-box">
-            <input type="text" id="answer-input" placeholder="여기에 정답 입력..." autocomplete="off" onkeypress="if(event.keyCode==13) checkSub()">
-            <button class="btn btn-blue" onclick="checkSub()">정답 확인</button>
+            <input type="text" id="answer-input" placeholder="정답 입력..." autocomplete="off" onkeypress="if(event.keyCode==13) checkSub()">
+            <button class="btn btn-blue" onclick="checkSub()">제출</button>
         </div>
     </div>
 </div>
 
 <script>
-const synonyms = [
-    ["alleviate", "mitigate"], ["auspicious", "prospective"], ["vital", "imperative"],
-    ["compliance", "comply with", "adhere to"], ["eligible", "be entitled to"],
-    ["utilize", "leverage", "take advantage of"], ["dedicate", "devote A to B"]
-];
-
 const data = [
-    {w: "a wide array of", m: "다양한", ex: "The store offers (               ) electronic accessories for laptops."},
-    {w: "account for", m: "차지하다", ex: "Overseas sales (               ) more than half of the company's total profit."},
-    {w: "acknowledge", m: "수령을 알리다", ex: "Please (               ) receipt of the package by signing the delivery form."},
-    {w: "acquire", m: "인수하다", ex: "Our firm plans to (               ) a promising startup to expand its market share."},
-    {w: "adhere to", m: "~을 준수하다", ex: "All staff members must (               ) the safety guidelines in the laboratory."},
-    {w: "compliance", m: "준수", ex: "All employees must work in (               ) with the safety standards."},
-    {w: "comply with", m: "~을 준수하다", ex: "The new factory must (               ) with environmental regulations."},
-    {w: "adversely", m: "부정적으로", ex: "The technical delay will (               ) affect the product launch schedule."},
-    {w: "advocate", m: "지지하다", ex: "The group is known to (               ) for the rights of underprivileged children."},
-    {w: "affordable", m: "가격이 적당한", ex: "The company aims to provide (               ) housing for young professionals."},
-    {w: "aggregate", m: "합계의", ex: "The (               ) score of the two matches decided the winner."},
-    {w: "alleviate", m: "완화하다", ex: "New measures were introduced to (               ) traffic congestion."},
-    {w: "mitigate", m: "완화시키다", ex: "Planting more trees can help (               ) the effects of climate change."},
-    {w: "ambiguous", m: "모호한", ex: "The instructions were too (               ), leading to confusion."},
-    {w: "ample", m: "충분한", ex: "There was (               ) evidence to support the theory proposed."},
-    {w: "as of late", m: "최근에", ex: "The stock market has been quite volatile (               )."},
-    {w: "assess", m: "평가하다", ex: "The committee will (               ) the impact of the new policy."},
-    {w: "attest to", m: "~을 증명하다", ex: "His success in the industry (               ) his hard work."},
-    {w: "attribute", m: "~의 덕분으로 돌리다", ex: "The CEO (               ) the company's success to teamwork."},
-    {w: "auspicious", m: "유망한", ex: "The project had an (               ) start with full funding secured."},
-    {w: "prospective", m: "유망한", ex: "(               ) students are invited to visit the campus."},
-    {w: "be consistent with", m: "~와 일치하다", ex: "The results of the study are (               ) with previous research."},
-    {w: "coincide", m: "일치하다", ex: "My vacation plans (               ) with my sister’s wedding date."},
-    {w: "be entitled to", m: "~할 자격이 있다", ex: "All full-time employees are (               ) to three weeks of vacation."},
-    {w: "eligible", m: "자격이 있는", ex: "Only small businesses are (               ) for the new grant."},
-    {w: "be liable for", m: "~에 대해 책임이 있다", ex: "The tenant is (               ) for any damage caused to the property."},
-    {w: "belated", m: "뒤늦은", ex: "She sent a (               ) birthday card to her friend."},
-    {w: "briefly", m: "잠시", ex: "The manager (               ) explained the changes to the project schedule."},
-    {w: "broaden", m: "넓히다", ex: "Traveling to different countries helps to (               ) one's perspective."},
-    {w: "circumvent", m: "우회하다", ex: "The company tried to (               ) the new tax laws."},
-    {w: "coherent", m: "일관성 있는", ex: "The speaker presented a (               ) argument."},
-    {w: "commence", m: "시작되다", ex: "The construction is set to (               ) next month."},
-    {w: "commitment to", m: "~에 대한 헌신", ex: "The organization has a strong (               ) to conservation."},
-    {w: "dedicate", m: "헌신하다", ex: "She decided to (               ) her life to helping the underprivileged."},
-    {w: "confidential", m: "기밀의", ex: "All patient records are kept strictly (               )."},
-    {w: "conducive", m: "도움이 되는", ex: "A quiet environment is (               ) to studying."},
-    {w: "contingency plan", m: "비상 대책", ex: "The company has a (               ) in case the supplier fails."},
-    {w: "contrary to", m: "~와는 반대로", ex: "(               ) to expectations, the movie was a huge success."},
-    {w: "curtail", m: "축소하다", ex: "The government decided to (               ) spending on infrastructure."},
-    {w: "delegate", m: "위임하다", ex: "A good manager knows how to (               ) tasks effectively."},
-    {w: "deplete", m: "고갈시키다", ex: "Years of overfarming have (               ) the soil."},
-    {w: "designated", m: "지정된", ex: "Please smoke only in the (               ) areas."},
-    {w: "deterrent", m: "억제책", ex: "Heavy fines serve as a (               ) to illegal parking."},
-    {w: "detrimental", m: "해로운", ex: "Lack of sleep can be (               ) to your health."},
-    {w: "devote A to B", m: "A를 B에 쏟다", ex: "He decided to (               ) all his energy to the project."},
-    {w: "discretion", m: "재량", ex: "The manager has the (               ) to offer discounts."},
-    {w: "discretionary", m: "자유 재량의", ex: "The committee has a (               ) fund for expenses."},
-    {w: "discrepancy", m: "불일치", ex: "The auditor found a (               ) in the records."},
-    {w: "draw a conclusion", m: "결론을 도출하다", ex: "We need more data before we can (               )."},
-    {w: "efficiently", m: "효율적으로", ex: "The new software will help the team work more (               )."},
-    {w: "eliminate", m: "제거하다", ex: "The company plans to (               ) all unnecessary costs."},
-    {w: "encompass", m: "포함하다", ex: "The training program will (               ) all aspects of service."},
-    {w: "endorse", m: "승인하다", ex: "The celebrity decided to (               ) the new product."},
-    {w: "erroneous", m: "잘못된", ex: "The news report contained (               ) information."},
-    {w: "excursion", m: "짧은 여행", ex: "The students went on an (               ) to the museum."},
-    {w: "exquisite", m: "정교한", ex: "The jewelry box was decorated with (               ) carvings."},
-    {w: "facilitate", m: "용이하게 하다", ex: "The system will (               ) communication."},
-    {w: "familiarize with", m: "~에 익숙해지다", ex: "New employees must (               ) company policies."},
-    {w: "favorable", m: "호의적인", ex: "The review of the new restaurant was very (               )."},
-    {w: "feasibility", m: "실연 가능성", ex: "Experts are conducting a study to determine the (               )."},
-    {w: "fluctuate", m: "변동하다", ex: "Gas prices often (               ) depending on oil supply."},
-    {w: "formidable", m: "위협적인", ex: "The opposing team is a (               ) opponent."},
-    {w: "fragile", m: "깨지기 쉬운", ex: "Please handle this with care as it is (               )."},
-    {w: "galvanize", m: "활력을 불어넣다", ex: "The leader's speech was designed to (               ) the crowd."},
-    {w: "genuine", m: "진짜의", ex: "The painting was confirmed to be a (               ) masterpiece."},
-    {w: "go into effect", m: "효력을 발생하다", ex: "The regulations will (               ) starting next Monday."},
-    {w: "halt", m: "중단하다", ex: "Production was temporarily (               ) due to a power outage."},
-    {w: "haphazard", m: "무계획적인", ex: "The books were arranged in a (               ) way."},
-    {w: "heed", m: "주의를 기울이다", ex: "Drivers should (               ) the warning signs."},
-    {w: "hinder", m: "방해하다", ex: "Heavy snow (               ) the rescue efforts."},
-    {w: "hospitality", m: "환대", ex: "We were overwhelmed by the warm (               )."},
-    {w: "impeccable", m: "결점 없는", ex: "The pianist’s performance was (               )."},
-    {w: "imperative", m: "필수적인", ex: "It is (               ) that all safety procedures are followed."},
-    {w: "vital", m: "필수적인", ex: "Strong communication is (               ) for success."},
-    {w: "impending", m: "임박한", ex: "The dark clouds suggested an (               ) storm."},
-    {w: "imply", m: "암시하다", ex: "His silence seemed to (               ) agreement."},
-    {w: "in accordance with", m: "~에 부합하여", ex: "Constructed in (               ) with safety standards."},
-    {w: "in conjunction with", m: "~와 협력하여", ex: "Launched in (               ) with the product release."},
-    {w: "in light of", m: "~을 고려하여", ex: "Revised the budget in (               ) of the losses."},
-    {w: "under consideration", m: "고려 중인", ex: "Several candidates are still (               ) for the job."},
-    {w: "in the event of", m: "~의 경우에", ex: "(               ) an emergency, use the stairs."},
-    {w: "incentive", m: "장려책", ex: "The company offers a performance-based (               )."},
-    {w: "incur", m: "발생시키다", ex: "Late payments will (               ) an additional fee."},
-    {w: "inherent", m: "내재된", ex: "There are (               ) risks involved in any venture."},
-    {w: "itinerary", m: "여행 일정표", ex: "The agent provided a detailed (               ) for our trip."},
-    {w: "jointly", m: "공동으로", ex: "The companies developed the technology (               )."},
-    {w: "judicious", m: "현명한", ex: "The manager made a (               ) decision."},
-    {w: "keen", m: "열망하는", ex: "She is (               ) to start her new job."},
-    {w: "keep in mind", m: "명심하다", ex: "Please (               ) that the office will be closed."},
-    {w: "keep track of", m: "~을 파악하다", ex: "The app helps users (               ) daily expenses."},
-    {w: "keep up with", m: "~을 따라잡다", ex: "Difficult to (               ) the fast-paced changes."},
-    {w: "legible", m: "읽기 쉬운", ex: "Make sure your handwriting is (               )."},
-    {w: "leverage", m: "활용하다", ex: "Plan to (               ) the brand name for new markets."},
-    {w: "take advantage of", m: "~을 활용하다", ex: "You should (               ) the free training."},
-    {w: "utilize", m: "활용하다", ex: "Learned how to (               ) the new software."},
-    {w: "liaise", m: "연락하다", ex: "The department will (               ) with the PR team."},
-    {w: "lucid", m: "명료한", ex: "The professor gave a (               ) explanation."},
-    {w: "lucrative", m: "수익성이 좋은", ex: "Real estate can be a very (               ) business."},
-    {w: "mandatory", m: "의무적인", ex: "Attendance is (               ) for all lab employees."},
-    {w: "manifest", m: "나타내다", ex: "Symptoms began to (               ) shortly after infection."},
-    {w: "moderate", m: "적당한", ex: "Engage in (               ) exercise three times a week."},
-    {w: "modification", m: "수정", ex: "Suggested several (               ) to improve efficiency."},
-    {w: "noteworthy", m: "주목할 만한", ex: "The collection includes several (               ) works."},
-    {w: "notify", m: "통지하다", ex: "The hotel will (               ) guests of changes."},
-    {w: "obsolete", m: "구식의", ex: "CDs have become largely (               )."},
-    {w: "on behalf of", m: "~을 대신하여", ex: "The lawyer spoke (               ) the client."},
-    {w: "on short notice", m: "갑작스럽게", ex: "She prepared the presentation (               )."},
-    {w: "optimize", m: "최적화하다", ex: "Working to (               ) engine performance."},
-    {w: "overhaul", m: "점검하다", ex: "Decided to (               ) the entire fleet for safety."},
-    {w: "oversee", m: "감독하다", ex: "The manager will (               ) the implementation."},
-    {w: "pave", m: "(길을) 닦다", ex: "The discovery will (               ) the way for processors."},
-    {w: "pending", m: "미결의", ex: "The application is still (               ) approval."},
-    {w: "perpetual", m: "영구적인", ex: "Region is known for its (               ) rain."},
-    {w: "point of contact", m: "연락 담당자", ex: "Use the office manager as your primary (               )."},
-    {w: "precarious", m: "불안정한", ex: "The climber was in a (               ) position."},
-    {w: "precaution", m: "예방 조치", ex: "Wearing a helmet is a necessary (               )."},
-    {w: "preliminary", m: "예비의", ex: "Published their (               ) findings in a journal."},
-    {w: "prerequisite", m: "전제 조건", ex: "Completion is a (               ) for the class."},
-    {w: "prior to", m: "~보다 앞서", ex: "Submit reports two days (               ) the meeting."},
-    {w: "promptly", m: "즉시", ex: "Emergency services arrived (               ) at the scene."},
-    {w: "prosperous", m: "번영하는", ex: "The town grew into a (               ) city."},
-    {w: "provisional estimate", m: "임시 견적", ex: "Provided a (               ) for the renovation."},
-    {w: "reimburse", m: "환급하다", ex: "Company will (               ) all travel expenses."},
-    {w: "refrain from", m: "~을 자제하다", ex: "Please (               ) talking in the library."},
-    {w: "reluctant", m: "꺼리는", ex: "He was (               ) to share personal information."},
-    {w: "resilient", m: "회복력 있는", ex: "Despite setbacks, the team remained (               )."},
-    {w: "retrieve", m: "검색하다", ex: "Database allows users to (               ) information."},
-    {w: "scrupulous", m: "꼼꼼한", ex: "Accountant was very (               ) with records."},
-    {w: "scrutinize", m: "면밀히 조사하다", ex: "Investigators will (               ) the documents."},
-    {w: "stagnant", m: "정체된", ex: "Sales have remained (               ) for three years."},
-    {w: "stem from", m: "~에서 기인하다", ex: "Health problems (               ) a lack of activity."},
-    {w: "stipulate", m: "규정하다", ex: "The contract (               ) the completion date."},
-    {w: "stringent", m: "엄격한", ex: "Introduced (               ) security measures."},
-    {w: "sturdy", m: "튼튼한", ex: "The hikers wore (               ) boots for the trail."},
-    {w: "subsequent", m: "차후의", ex: "(               ) trials were more successful."},
-    {w: "take precedence", m: "우선권을 갖다", ex: "Safety must (               ) over speed."},
-    {w: "tedious", m: "지루한", ex: "The task of entering data was very (               )."},
-    {w: "temporarily", m: "일시적으로", ex: "Website will be (               ) unavailable."},
-    {w: "tentatively", m: "잠정적으로", ex: "The next meeting is (               ) scheduled."},
-    {w: "terminate", m: "종료하다", ex: "Decided to (               ) the contract early."},
-    {w: "unanimous", m: "만장일치의", ex: "Reached a (               ) decision on the budget."},
-    {w: "unprecedented", m: "전례 없는", ex: "Saw (               ) growth in sales this year."},
-    {w: "unravel", m: "해결하다", ex: "Worked hard to (               ) the technical issue."},
-    {w: "validity", m: "유효성", ex: "Confirm the (               ) of your license."},
-    {w: "verify", m: "확인하다", ex: "The system will (               ) your identity."},
-    {w: "versatile", m: "다재다능한", ex: "This (               ) tool has many uses."},
-    {w: "vigilant", m: "경계하는", ex: "Remain (               ) against security threats."},
-    {w: "volatile", m: "변동이 심한", ex: "The market has been quite (               ) lately."},
-    {w: "withstand", m: "견디다", ex: "Designed to (               ) strong winds."},
-    {w: "yield", m: "산출하다", ex: "The techniques have (               ) a higher crop."},
-    {w: "vague", m: "애매한", ex: "His answer was too (               ) to be useful."},
-    {w: "perfectionist", m: "완벽주의자", ex: "She is a total (               ) in her work."},
-    {w: "indifferent", m: "무관심한", ex: "He seemed (               ) to the results."}
+    {n:1, w:"a wide array of", m:"다양한", ex:"The store offers (               ) electronic accessories for laptops."},
+    {n:2, w:"account for", m:"차지하다", ex:"Overseas sales (               ) more than half of the company's total profit."},
+    {n:3, w:"acknowledge", m:"수령을 알리다", ex:"Please (               ) receipt of the package by signing the delivery form."},
+    {n:4, w:"acquire", m:"인수하다", ex:"Our firm plans to (               ) a promising startup to expand its market share."},
+    {n:5, w:"adhere to", m:"~을 준수하다", ex:"All staff members must (               ) the safety guidelines in the laboratory."},
+    {n:6, w:"compliance", m:"준수", ex:"All employees must work in (               ) with the safety standards."},
+    {n:7, w:"comply with", m:"~을 준수하다", ex:"The new factory must (               ) with environmental regulations."},
+    {n:8, w:"adversely", m:"부정적으로", ex:"The technical delay will (               ) affect the product launch schedule."},
+    {n:9, w:"advocate", m:"지지하다", ex:"Many experts (               ) for the use of renewable energy in manufacturing."},
+    {n:10, w:"affordable", m:"가격이 적당한", ex:"The brand is known for providing high-quality and (               ) software."},
+    {n:11, w:"aggregate", m:"합계의", ex:"The (               ) number of subscribers reached one million this month."},
+    {n:12, w:"alleviate", m:"완화하다", ex:"The new administrative policy is designed to (               ) workload stress."},
+    {n:13, w:"mitigate", m:"완화시키다", ex:"Regular maintenance can help (               ) the risk of system failures."},
+    {n:14, w:"ambiguous", m:"모호한", ex:"The instructions were too (               ) for the new employees to follow."},
+    {n:15, w:"ample", m:"충분한", ex:"There is (               ) space in the new warehouse for storing extra inventory."},
+    {n:16, w:"as of late", m:"최근에", ex:"(               ), there has been a significant increase in online orders."},
+    {n:17, w:"assess", m:"평가하다", ex:"We need to (               ) the potential risks before starting the new project."},
+    {n:18, w:"attest to", m:"~을 증명하다", ex:"These positive reviews (               ) the reliability of our products."},
+    {n:19, w:"attribute", m:"~의 덕분으로 돌리다", ex:"The manager (               ) the team's success to their cooperation."},
+    {n:20, w:"auspicious", m:"유망한", ex:"The high sales figures on the first day were an (               ) sign."},
+    {n:21, w:"prospective", m:"유망한", ex:"The company is interviewing several (               ) candidates today."},
+    {n:22, w:"be consistent with", m:"~와 일치하다", ex:"The new design must (               ) the company's brand image."},
+    {n:23, w:"coincide", m:"일치하다", ex:"The workshop will (               ) with the annual industry conference."},
+    {n:24, w:"be entitled to", m:"~할 자격이 있다", ex:"Regular members are (               ) to a 10% discount on all items."},
+    {n:25, w:"eligible", m:"자격이 있는", ex:"You will be (               ) for health insurance after three months of work."},
+    {n:26, w:"be liable for", m:"~에 대해 책임이 있다", ex:"The shipping company will (               ) any damages during transit."},
+    {n:27, w:"belated", m:"뒤늦은", ex:"Please accept our (               ) apologies for the delay in your shipment."},
+    {n:28, w:"briefly", m:"잠시", ex:"The director (               ) explained the main goals of the meeting."},
+    {n:29, w:"broaden", m:"넓히다", ex:"We are looking for ways to (               ) our presence in the global market."},
+    {n:30, w:"circumvent", m:"우회하다", ex:"The company tried to (               ) the new regulations by changing policy."},
+    {n:31, w:"coherent", m:"일관성 있는", ex:"The speaker presented a (               ) argument for the proposed changes."},
+    {n:32, w:"commence", m:"시작되다", ex:"The construction work is scheduled to (               ) early next month."},
+    {n:33, w:"commitment to", m:"~에 대한 헌신", ex:"Our (               ) customer satisfaction has never changed."},
+    {n:34, w:"dedicate", m:"헌신하다", ex:"We will (               ) more resources to improving our customer support."},
+    {n:35, w:"confidential", m:"기밀의", ex:"Please ensure that all (               ) files are kept in a secure location."},
+    {n:36, w:"conducive", m:"도움이 되는", ex:"A quiet environment is (               ) to high productivity in the office."},
+    {n:37, w:"contingency plan", m:"비상 대책", ex:"We need to develop a (               ) for possible power outages."},
+    {n:38, w:"contrary to", m:"~와는 반대로", ex:"(               ) our expectations, the project was completed early."},
+    {n:39, w:"curtail", m:"축소하다", ex:"The company decided to (               ) its spending on advertising this year."},
+    {n:40, w:"delegate", m:"위임하다", ex:"A good leader knows how to (               ) tasks to team members."},
+    {n:41, w:"deplete", m:"고갈시키다", ex:"Excessive printing will quickly (               ) the remaining paper supply."},
+    {n:42, w:"designated", m:"지정된", ex:"Smoking is only allowed in the (               ) areas outside the building."},
+    {n:43, w:"deterrent", m:"억제책", ex:"The new security system acts as a (               ) against unauthorized access."},
+    {n:44, w:"detrimental", m:"해로운", ex:"Lack of sleep can be (               ) to your performance at work."},
+    {n:45, w:"devote A to B", m:"A를 B에 쏟다", ex:"The team will (               ) more time to final testing before release."},
+    {n:46, w:"discretion", m:"재량", ex:"Bonuses are distributed at the (               ) of the department head."},
+    {n:47, w:"discretionary", m:"자유 재량의", ex:"The manager has a (               ) budget for team-building activities."},
+    {n:48, w:"discrepancy", m:"불일치", ex:"The accountant found a slight (               ) in the financial report."},
+    {n:49, w:"draw a conclusion", m:"결론을 도출하다", ex:"We need more data before we can (               ) from the test."},
+    {n:50, w:"efficiently", m:"효율적으로", ex:"The new machine is designed to process materials more (               )."},
+    {n:51, w:"eliminate", m:"제거하다", ex:"Our goal is to (               ) unnecessary steps in the production process."},
+    {n:52, w:"encompass", m:"포함하다", ex:"The training program will (               ) all aspects of project management."},
+    {n:53, w:"endorse", m:"승인하다", ex:"The board of directors is expected to (               ) the new strategy."},
+    {n:54, w:"erroneous", m:"잘못된", ex:"The system crashed because it received (               ) data from the server."},
+    {n:55, w:"excursion", m:"짧은 여행", ex: "The hotel offers an (               ) to the local historical sites."},
+    {n:56, w:"exquisite", m:"정교한", ex:"The hotel lobby is decorated with (               ) pieces of modern art."},
+    {n:57, w:"facilitate", m:"용이하게 하다", ex:"The new software will (               ) better communication among teams."},
+    {n:58, w:"familiarize with", m:"~에 익숙해지다", ex:"New employees should (               ) themselves with the office rules."},
+    {n:59, w:"favorable", m:"호의적인", ex:"The new product received (               ) reviews from both critics and users."},
+    {n:60, w:"feasibility", m:"실연 가능성", ex:"We are conducting a study to check the (               ) of the plan."},
+    {n:61, w:"fluctuate", m:"변동하다", ex:"The price of raw materials continues to (               ) every month."},
+    {n:62, w:"formidable", m:"위협적인", ex:"Our company is facing (               ) competition in the global market."},
+    {n:63, w:"fragile", m:"깨지기 쉬운", ex:"Please handle the package with care because the items are (               )."},
+    {n:64, w:"galvanize", m:"활력을 불어넣다", ex:"The leader's speech helped (               ) the team to work harder."},
+    {n:65, w:"genuine", m:"진짜의", ex:"Always use (               ) spare parts to maintain your machine's warranty."},
+    {n:66, w:"go into effect", m:"효력을 발생하다", ex:"The new smoking ban will (               ) starting next Monday."},
+    {n:67, w:"halt", m:"중단하다", ex:"The production was forced to (               ) due to a sudden power failure."},
+    {n:68, w:"haphazard", m:"무계획적인", ex:"The files were organized in a (               ) way, making them hard to find."},
+    {n:69, w:"heed", m:"주의를 기울이다", ex:"Future investors should (               ) the warnings about market volatility."},
+    {n:70, w:"hinder", m:"방해하다", ex:"Heavy snow might (               ) the delivery of your package this week."},
+    {n:71, w:"hospitality", m:"환대", ex:"We were impressed by the warm (               ) of the hotel staff."},
+    {n:72, w:"impeccable", m:"결점 없는", ex:"Her (               ) performance made her the top candidate for the job."},
+    {n:73, w:"imperative", m:"필수적인", ex:"It is (               ) that we finish the project before the deadline."},
+    {n:74, w:"vital", m:"필수적인", ex:"Regular exercise is (               ) for maintaining good health."},
+    {n:75, w:"impending", m:"임박한", ex:"We are all busy preparing for the (               ) audit next week."},
+    {n:76, w:"imply", m:"암시하다", ex:"The low price does not (               ) that the product is of poor quality."},
+    {n:77, w:"in accordance with", m:"~에 부합하여", ex:"All products are manufactured (               ) safety laws."},
+    {n:78, w:"in conjunction with", m:"~와 협력하여", ex:"We are working (               ) a local marketing agency."},
+    {n:79, w:"in light of", m:"~을 고려하여", ex:"(               ) the recent complaints, we have improved our services."},
+    {n:80, w:"under consideration", m:"고려 중인", ex:"Several new projects are currently (               )."},
+    {n:81, w:"in the event of", m:"~의 경우에", ex:"(               ) an emergency, please use the stairs to exit."},
+    {n:82, w:"incentive", m:"장려책", ex:"The company offers a cash (               ) to employees who meet goals."},
+    {n:83, w:"incur", m:"발생시키다", ex:"Late payments will (               ) an additional fee of ten dollars."},
+    {n:84, w:"inherent", m:"내재된", ex:"There are (               ) risks in investing in any new business venture."},
+    {n:85, w:"itinerary", m:"여행 일정표", ex:"Please check the (               ) for the exact time of the guided tour."},
+    {n:86, w:"jointly", m:"공동으로", ex:"The two companies will (               ) develop a new mobile application."},
+    {n:87, w:"judicious", m:"현명한", ex:"The company made a (               ) decision to save money."},
+    {n:88, w:"keen", m:"열망하는", ex:"She is (               ) to learn new skills to improve her career."},
+    {n:89, w:"keep in mind", m:"명심하다", ex:"Please (               ) that the office will be closed on Friday."},
+    {n:90, w:"keep track of", m:"~을 파악하다", ex:"This app helps you (               ) your daily expenses easily."},
+    {n:91, w:"keep up with", m:"~을 따라잡다", ex:"It is important to (               ) the latest trends in the industry."},
+    {n:92, w:"legible", m:"읽기 쉬운", ex:"Your signature on the form must be clear and (               )."},
+    {n:93, w:"leverage", m:"활용하다", ex:"We can (               ) our strong brand name to enter new markets."},
+    {n:94, w:"take advantage of", m:"~을 활용하다", ex:"You should (               ) the free training sessions."},
+    {n:95, w:"utilize", m:"활용하다", ex:"We should (               ) all available resources to finish the job."},
+    {n:96, w:"liaise", m:"연락하다", ex:"My job is to (               ) with clients to ensure needs are met."},
+    {n:97, w:"lucid", m:"명료한", ex:"The manager gave a (               ) explanation of the new policy."},
+    {n:98, w:"lucrative", m:"수익성이 좋은", ex:"The partnership proved to be a (               ) business move."},
+    {n:99, w:"mandatory", m:"의무적인", ex:"Attendance at the safety orientation is (               ) for all staff."},
+    {n:100, w:"manifest", m:"나타내다", ex:"The symptoms of the problem began to (               ) after update."},
+    {n:101, w:"moderate", m:"적당한", ex:"The technician suggested keeping the machine at a (               ) speed."},
+    {n:102, w:"modification", m:"수정", ex:"The client requested a minor (               ) to the contract terms."},
+    {n:103, w:"noteworthy", m:"주목할 만한", ex:"The increase in sales is a (               ) achievement for our team."},
+    {n:104, w:"notify", m:"통지하다", ex:"Please (               ) the manager if you are unable to attend."},
+    {n:105, w:"obsolete", m:"구식의", ex:"New technology has made the old manufacturing process (               )."},
+    {n:106, w:"on behalf of", m:"~을 대신하여", ex:"I am writing this email (               ) the marketing director."},
+    {n:107, w:"on short notice", m:"갑작스럽게", ex:"Thank you for attending the emergency meeting (               )."},
+    {n:108, w:"optimize", m:"최적화하다", ex:"We are looking for ways to (               ) our energy consumption."},
+    {n:109, w:"overhaul", m:"점검하다", ex:"The company plans to (               ) its computer network system."},
+    {n:110, w:"oversee", m:"감독하다", ex:"A senior manager was appointed to (               ) the new project."},
+    {n:111, w:"pave", m:"(길을) 닦다", ex:"This discovery will (               ) the way for new medical treatments."},
+    {n:112, w:"pending", m:"미결의", ex:"The transaction is still (               ) approval from the head office."},
+    {n:113, w:"perpetual", m:"영구적인", ex:"The company was granted (               ) access to the database."},
+    {n:114, w:"point of contact", m:"연락 담당자", ex:"She is the main (               ) for all customer inquiries."},
+    {n:115, w:"precarious", m:"불안정한", ex:"The company is in a (               ) financial position."},
+    {n:116, w:"precaution", m:"예방 조치", ex:"Wearing a helmet is a necessary (               ) on the site."},
+    {n:117, w:"preliminary", m:"예비의", ex:"The (               ) results of the survey will be released tomorrow."},
+    {n:118, w:"prerequisite", m:"전제 조건", ex:"Basic computer skills are a (               ) for this office job."},
+    {n:119, w:"prior to", m:"~보다 앞서", ex:"All documents must be signed (               ) the start of meeting."},
+    {n:120, w:"promptly", m:"즉시", ex:"Please respond (               ) to the client's urgent request."},
+    {n:121, w:"prosperous", m:"번영하는", ex:"Our goal is to build a (               ) future for all employees."},
+    {n:122, w:"provisional estimate", m:"임시 견적", ex:"We can provide a (               ) for the repair costs."},
+    {n:123, w:"reimburse", m:"환급하다", ex:"The company will (               ) you for your travel expenses."},
+    {n:124, w:"refrain from", m:"~을 자제하다", ex:"Please (               ) taking photos during the presentation."},
+    {n:125, w:"reluctant", m:"꺼리는", ex:"Some members were (               ) to accept the new changes."},
+    {n:126, w:"resilient", m:"회복력 있는", ex:"The economy has proven to be (               ) despite challenges."},
+    {n:127, w:"retrieve", m:"검색하다", ex:"It is easy to (               ) your lost password from the website."},
+    {n:128, w:"scrupulous", m:"꼼꼼한", ex:"The accountant is very (               ) about keeping accurate records."},
+    {n:129, w:"scrutinize", m:"면밀히 조사하다", ex:"Experts will (               ) the data to ensure no errors."},
+    {n:130, w:"stagnant", m:"정체된", ex:"Sales have remained (               ) for the last three months."},
+    {n:131, w:"stem from", m:"~에서 기인하다", ex:"Most of the technical problems (               ) old hardware."},
+    {n:132, w:"stipulate", m:"규정하다", ex:"The contract will (               ) the exact date of delivery."},
+    {n:133, w:"stringent", m:"엄격한", ex:"The facility must follow (               ) safety regulations."},
+    {n:134, w:"sturdy", m:"튼튼한", ex:"Our new laptop models are protected by a (               ) casing."},
+    {n:135, w:"subsequent", m:"차후의", ex: "(               ) events proved that our initial plan was correct."},
+    {n:136, w:"take precedence", m:"우선권을 갖다", ex:"Quality control should (               ) over speed in production."},
+    {n:137, w:"tedious", m:"지루한", ex:"Data entry can be a (               ) task if done for a long time."},
+    {n:138, w:"temporarily", m:"일시적으로", ex:"The website will be (               ) unavailable due to maintenance."},
+    {n:139, w:"tentatively", m:"잠정적으로", ex:"The next meeting is (               ) scheduled for next Friday."},
+    {n:140, w:"terminate", m:"종료하다", ex:"The company decided to (               ) the contract early."},
+    {n:141, w:"unanimous", m:"만장일치의", ex:"The committee reached a (               ) decision on the budget."},
+    {n:142, w:"unprecedented", m:"전례 없는", ex:"The company saw (               ) growth in sales this year."},
+    {n:143, w:"unravel", m:"해결하다", ex:"The team worked hard to (               ) the complex issue."},
+    {n:144, w:"validity", m:"유효성", ex:"Please confirm the (               ) of your license before it expires."},
+    {n:145, w:"verify", m:"확인하다", ex:"The system will (               ) your identity using a code."},
+    {n:146, w:"versatile", m:"다재다능한", ex:"This (               ) tool can be used for many different tasks."},
+    {n:147, w:"vigilant", m:"경계하는", ex:"We must remain (               ) against any possible security threats."},
+    {n:148, w:"volatile", m:"변동이 심한", ex:"The stock market has been very (               ) over the past month."},
+    {n:149, w:"withstand", m:"견디다", ex:"The new building is designed to (               ) strong winds."},
+    {n:150, w:"yield", m:"산출하다", ex:"The new marketing strategy is starting to (               ) good results."}
 ];
 
 let queue = [], curIdx = 0, score = 0, testMode = '';
 
 function start(m) {
     testMode = m;
-    let count = document.getElementById('qCount').value;
+    let count = parseInt(document.getElementById('qCount').value);
     queue = [...data].sort(() => Math.random() - 0.5).slice(0, count);
     curIdx = 0; score = 0;
     document.getElementById('setup-view').style.display = 'none';
@@ -241,6 +216,7 @@ function start(m) {
 function render() {
     const q = queue[curIdx];
     document.getElementById('progress-text').innerText = `${curIdx + 1} / ${queue.length}`;
+    document.getElementById('score-text').innerText = `맞은 개수: ${score}`;
     const optArea = document.getElementById('options-area');
     const inputArea = document.getElementById('input-box');
     
@@ -262,21 +238,15 @@ function makeOptions(correct) {
     const area = document.getElementById('options-area');
     area.innerHTML = '';
     
-    let forbidden = [correct.w];
-    for (let group of synonyms) {
-        if (group.includes(correct.w)) {
-            forbidden = group; break;
-        }
-    }
-
-    let distractors = data.filter(item => !forbidden.includes(item.w)).sort(() => Math.random() - 0.5).slice(0, 3);
+    // 오답 선지 3개 추출 (정답 제외)
+    let distractors = data.filter(item => item.w !== correct.w).sort(() => Math.random() - 0.5).slice(0, 3);
     let final = [...distractors, correct].sort(() => Math.random() - 0.5);
 
     final.forEach(opt => {
         const btn = document.createElement('button');
         btn.className = 'opt-btn';
         btn.innerText = (testMode === 'toEng') ? opt.w : opt.m;
-        btn.onclick = () => check(opt === correct);
+        btn.onclick = () => check(opt.w === correct.w);
         area.appendChild(btn);
     });
 }
@@ -292,7 +262,7 @@ function check(isCorrect) {
     curIdx++;
     if (curIdx < queue.length) render();
     else {
-        alert(`🎉 종료!\n최종 점수: ${score} / ${queue.length}`);
+        alert(`🎉 테스트 종료!\n최종 점수: ${score} / ${queue.length}`);
         location.reload();
     }
 }
