@@ -2,349 +2,316 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Voca Trainer Pro - 150 Master</title>
+    <title>2026 단어왕 실전 테스트</title>
     <style>
-        body { font-family: 'Pretendard', sans-serif; padding: 20px; max-width: 900px; margin: 0 auto; background: #f5f7fa; color: #333; }
-        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #2c3e50; margin-bottom: 10px; }
-        .config-area { text-align: center; margin-bottom: 20px; padding: 15px; background: #edf2f7; border-radius: 10px; }
-        .btn-group { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 20px; }
-        button { padding: 12px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .btn-test { background: #4a90e2; color: white; }
-        .btn-ex { background: #2ecc71; color: white; }
-        .btn-wrong { background: #e67e22; color: white; }
-        .btn-reset { background: #95a5a6; color: white; }
+        body { font-family: 'Pretendard', sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+        .exam-card { background: white; width: 100%; max-width: 600px; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        h2 { text-align: center; color: #1a1a1a; margin-bottom: 30px; letter-spacing: -1px; }
+        .stats { display: flex; justify-content: space-between; color: #888; font-size: 0.9em; margin-bottom: 10px; }
         
-        #test-area { display: none; margin-top: 20px; padding: 30px; border: 3px solid #4a90e2; border-radius: 12px; text-align: center; background: #fff; }
-        #question-text { font-size: 1.6em; margin: 20px 0; color: #2c3e50; font-weight: bold; line-height: 1.5; }
-        #question-trans { color: #636e72; font-size: 1em; margin-bottom: 20px; background: #f1f2f6; padding: 10px; border-radius: 5px; min-height: 20px; }
+        #question-box { min-height: 120px; display: flex; align-items: center; justify-content: center; text-align: center; margin-bottom: 30px; }
+        #question-text { font-size: 1.8em; font-weight: 700; color: #2d3436; line-height: 1.4; word-break: keep-all; }
         
-        .options-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-        .option-btn { padding: 15px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 10px; cursor: pointer; font-size: 1.05em; text-align: left; }
-        .option-btn:hover { background: #edf2f7; border-color: #4a90e2; }
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        .opt-btn { 
+            padding: 18px 25px; border: 2px solid #e0e0e0; border-radius: 12px; background: none; 
+            font-size: 1.1em; text-align: left; cursor: pointer; transition: all 0.2s; color: #444;
+        }
+        .opt-btn:hover { border-color: #4a90e2; background: #f8fbff; color: #4a90e2; }
         
-        input[type="text"] { width: 80%; padding: 12px; font-size: 1.2em; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 15px; text-align: center; }
-        .word-list { margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; }
-        .word-item { padding: 8px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; font-size: 0.9em; }
-        .is-incorrect { background-color: #fff5f5; }
+        #input-box { display: none; text-align: center; }
+        #answer-input { 
+            width: 100%; padding: 15px; font-size: 1.3em; border: 2px solid #e0e0e0; 
+            border-radius: 12px; outline: none; text-align: center; margin-bottom: 15px; 
+        }
+        
+        .nav-btns { margin-top: 30px; display: flex; gap: 10px; justify-content: center; }
+        .btn { padding: 12px 25px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; }
+        .btn-blue { background: #4a90e2; color: white; }
+        .btn-green { background: #2ecc71; color: white; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>📚 2026 단어왕 150제</h1>
-    <div class="config-area">
-        <span>테스트 문제 수: </span>
-        <input type="number" id="testCount" value="20" style="width:60px;">
-    </div>
+<div class="exam-card">
+    <h2>🏆 단어왕 실전 테스트</h2>
     
-    <div class="btn-group">
-        <button class="btn-test" onclick="startTest('toEng', false)">뜻 → 영어</button>
-        <button class="btn-test" onclick="startTest('toKor', false)">영어 → 뜻</button>
-        <button class="btn-ex" onclick="startTest('example', false)">예문 빈칸 (주관식)</button>
-        <button class="btn-wrong" onclick="startTest('toEng', true)">오답 연습 (영)</button>
-        <button class="btn-reset" onclick="resetIncorrect()">오답 초기화</button>
-    </div>
-
-    <div id="test-area">
-        <div id="question-info" style="color:#7f8c8d; font-size:0.9em;"></div>
-        <div id="question-text"></div>
-        <div id="question-trans"></div>
-        <div id="options-area" class="options-container"></div>
-        <div id="subjective-area" style="display:none;">
-            <input type="text" id="answerInput" placeholder="정답 입력" onkeypress="if(event.keyCode==13) checkSubjectiveAnswer()">
-            <button class="btn-test" onclick="checkSubjectiveAnswer()">제출</button>
+    <div id="setup-view">
+        <p style="text-align:center; color:#666;">힌트 없이 실제 시험처럼 진행됩니다.</p>
+        <div style="margin: 20px 0; text-align:center;">
+            문제 수: <input type="number" id="qCount" value="20" style="width:50px; padding:5px; border-radius:5px; border:1px solid #ddd;">
+        </div>
+        <div class="nav-btns">
+            <button class="btn btn-blue" onclick="start('toEng')">뜻 → 영어</button>
+            <button class="btn btn-blue" onclick="start('toKor')">영어 → 뜻</button>
+            <button class="btn btn-green" onclick="start('ex')">예문 빈칸</button>
         </div>
     </div>
 
-    <div class="word-list">
-        <h3>단어 목록 (<span id="count-display">0</span>)</h3>
-        <div id="list-container"></div>
+    <div id="test-view" style="display:none;">
+        <div class="stats">
+            <span id="progress-text">1 / 20</span>
+            <span id="score-text">맞은 개수: 0</span>
+        </div>
+        <div id="question-box">
+            <div id="question-text">Question?</div>
+        </div>
+        
+        <div id="options-area" class="options-grid"></div>
+        
+        <div id="input-box">
+            <input type="text" id="answer-input" placeholder="정답을 입력하세요..." autocomplete="off" onkeypress="if(event.keyCode==13) checkSub()">
+            <button class="btn btn-blue" style="width:100%" onclick="checkSub()">제출</button>
+        </div>
     </div>
 </div>
 
 <script>
-    // 유의어 그룹 정의 (객관식 선지에서 겹치지 않게 하기 위함)
-    const synonymGroups = [
-        ["alleviate", "mitigate"],
-        ["auspicious", "prospective"],
-        ["compliance", "comply with", "adhere to"],
-        ["dedicate", "devote A to B", "commitment to"],
-        ["eligible", "be entitled to"],
-        ["vital", "imperative"],
-        ["utilize", "leverage", "take advantage of"]
-    ];
+// 유의어 그룹 (선지 중복 방지 로직용)
+const synonyms = [
+    ["alleviate", "mitigate"], ["auspicious", "prospective"], ["vital", "imperative"],
+    ["compliance", "comply with", "adhere to"], ["eligible", "be entitled to"],
+    ["utilize", "leverage", "take advantage of"], ["dedicate", "devote A to B"]
+];
 
-    const words = [
-        {word: "a wide array of", mean: "다양한", ex: "The store offers (               ) electronic accessories.", trans: "그 상점은 다양한 전자 액세서리를 제공합니다."},
-        {word: "account for", mean: "차지하다", ex: "Overseas sales (               ) more than half of profit.", trans: "해외 매출이 이익의 절반 이상을 차지합니다."},
-        {word: "acknowledge", mean: "수령을 알리다", ex: "Please (               ) receipt of the package.", trans: "물품 수령 확인을 위해 서명해 주세요."},
-        {word: "acquire", mean: "인수하다", ex: "Our firm plans to (               ) a promising startup.", trans: "유망한 스타트업을 인수할 계획입니다."},
-        {word: "adhere to", mean: "~을 준수하다", ex: "Staff must (               ) the safety guidelines.", trans: "직원들은 안전 지침을 준수해야 합니다."},
-        {word: "compliance", mean: "준수", ex: "Work in (               ) with the safety standards.", trans: "안전 기준을 준수하며 근무해야 합니다."},
-        {word: "comply with", mean: "~을 준수하다", ex: "The factory must (               ) environmental regulations.", trans: "공장은 환경 규정을 준수해야 합니다."},
-        {word: "adversely", mean: "부정적으로", ex: "The delay will (               ) affect the launch.", trans: "지연은 출시에 부정적으로 영향을 미칠 것입니다."},
-        {word: "advocate", mean: "지지하다", ex: "Experts (               ) for the use of renewable energy.", trans: "전문가들은 재생 에너지 사용을 지지합니다."},
-        {word: "affordable", mean: "가격이 적당한", ex: "The brand provides (               ) software.", trans: "그 브랜드는 가격이 적당한 소프트웨어를 제공합니다."},
-        {word: "aggregate", mean: "합계의", ex: "The (               ) number of subscribers reached one million.", trans: "전체 구독자 수가 100만 명에 도달했습니다."},
-        {word: "alleviate", mean: "완화하다", ex: "The policy is designed to (               ) workload stress.", trans: "그 정책은 업무 스트레스를 완화하기 위해 설계되었습니다."},
-        {word: "mitigate", mean: "완화시키다", ex: "Maintenance can help (               ) system failures.", trans: "점검은 시스템 고장의 위험을 완화하는 데 도움이 됩니다."},
-        {word: "ambiguous", mean: "모호한", ex: "The instructions were too (               ).", trans: "지시 사항이 너무 모호했습니다."},
-        {word: "ample", mean: "충분한", ex: "There is (               ) space in the new warehouse.", trans: "새 창고에는 충분한 공간이 있습니다."},
-        {word: "as of late", mean: "최근에", ex: "Online orders have increased (               ).", trans: "최근 들어 온라인 주문이 눈에 띄게 증가했습니다."},
-        {word: "assess", mean: "평가하다", ex: "We need to (               ) the potential risks.", trans: "잠재적인 위험을 평가해야 합니다."},
-        {word: "attest to", mean: "~을 증명하다", ex: "Positive reviews (               ) our reliability.", trans: "긍정적인 후기는 우리의 신뢰성을 증명합니다."},
-        {word: "attribute", mean: "~의 덕분으로 돌리다", ex: "The manager (               ) success to cooperation.", trans: "매니저는 성공을 협력 덕분으로 돌립니다."},
-        {word: "auspicious", mean: "유망한(a)", ex: "The sales figures were an (               ) sign.", trans: "판매 수치는 유망한 징조였습니다."},
-        {word: "prospective", mean: "유망한(p)", ex: "We are interviewing several (               ) candidates.", trans: "몇 명의 유망한 후보자들을 면접하고 있습니다."},
-        {word: "be consistent with", mean: "~와 일치하다", ex: "Design must be (               ) the brand image.", trans: "디자인은 브랜드 이미지와 일치해야 합니다."},
-        {word: "coincide", mean: "일치하다", ex: "The workshop will (               ) with the conference.", trans: "워크숍은 컨퍼런스 일정과 일치할 것입니다."},
-        {word: "be entitled to", mean: "~할 자격이 있다", ex: "Members are (               ) to a discount.", trans: "회원은 할인을 받을 자격이 있습니다."},
-        {word: "eligible", mean: "자격이 있는", ex: "You will be (               ) for health insurance.", trans: "건강보험 혜택을 받을 자격이 주어집니다."},
-        {word: "be liable for", mean: "~에 대해 책임이 있다", ex: "The company will be (               ) for damages.", trans: "회사는 손해에 대해 책임을 질 것입니다."},
-        {word: "belated", mean: "뒤늦은", ex: "Please accept our (               ) apologies.", trans: "뒤늦게나마 사과드리니 받아주십시오."},
-        {word: "briefly", mean: "잠시", ex: "The director (               ) explained the goals.", trans: "이사는 목표를 잠시 설명했습니다."},
-        {word: "broaden", mean: "넓히다", ex: "Ways to (               ) our presence in global market.", trans: "세계 시장에서 입지를 넓힐 방법을 찾고 있습니다."},
-        {word: "circumvent", mean: "우회하다", ex: "The company tried to (               ) the regulations.", trans: "회사는 규제를 우회하려 노력했습니다."},
-        {word: "coherent", mean: "일관성 있는", ex: "He presented a (               ) argument.", trans: "그는 일관성 있는 논거를 제시했습니다."},
-        {word: "commence", mean: "시작되다", ex: "Construction is set to (               ) next month.", trans: "공사는 다음 달에 시작될 예정입니다."},
-        {word: "commitment to", mean: "~에 대한 헌신", ex: "Our (               ) to satisfaction has never changed.", trans: "만족을 향한 우리의 헌신은 변치 않았습니다."},
-        {word: "dedicate", mean: "헌신하다", ex: "We will (               ) more resources to support.", trans: "우리는 지원 개선에 더 많은 자원을 투입할 것입니다."},
-        {word: "confidential", mean: "기밀의", ex: "Ensure all (               ) files are kept secure.", trans: "모든 기밀 파일은 안전하게 보관해 주세요."},
-        {word: "conducive", mean: "도움이 되는", ex: "A quiet environment is (               ) to productivity.", trans: "조용한 환경은 생산성 유지에 도움이 됩니다."},
-        {word: "contingency plan", mean: "비상 대책", ex: "Develop a (               ) for power outages.", trans: "정전에 대비한 비상 대책을 마련해야 합니다."},
-        {word: "contrary to", mean: "~와는 반대로", ex: "(               ) to expectations, it was early.", trans: "예상과는 반대로 일찍 끝났습니다."},
-        {word: "curtail", mean: "축소하다", ex: "The company decided to (               ) spending.", trans: "회사는 지출을 축소하기로 결정했습니다."},
-        {word: "delegate", mean: "위임하다", ex: "A leader knows how to (               ) tasks.", trans: "리더는 업무를 위임하는 법을 압니다."},
-        {word: "deplete", mean: "고갈시키다", ex: "Excessive printing will (               ) paper supply.", trans: "과도한 인쇄는 종이 공급량을 고갈시킬 것입니다."},
-        {word: "designated", mean: "지정된", ex: "Smoking is allowed in (               ) areas.", trans: "흡연은 지정된 구역에서만 가능합니다."},
-        {word: "deterrent", mean: "억제책", ex: "Security acts as a (               ) against intrusion.", trans: "보안 시스템은 무단 침입에 대한 억제책 역할을 합니다."},
-        {word: "detrimental", mean: "해로운", ex: "Lack of sleep can be (               ) to performance.", trans: "수면 부족은 업무 성과에 해로울 수 있습니다."},
-        {word: "devote A to B", mean: "A를 B에 쏟다", ex: "The team will (               ) more time to testing.", trans: "팀은 테스트에 더 많은 시간을 쏟을 것입니다."},
-        {word: "discretion", mean: "재량", ex: "Bonuses are at the (               ) of the head.", trans: "보너스는 부서장의 재량에 따라 지급됩니다."},
-        {word: "discretionary", mean: "자유 재량의", ex: "The manager has a (               ) budget.", trans: "매니저는 재량 예산을 가지고 있습니다."},
-        {word: "discrepancy", mean: "불일치", ex: "Found a slight (               ) in the report.", trans: "보고서에서 약간의 불일치를 발견했습니다."},
-        {word: "draw a conclusion", mean: "결론을 도출하다", ex: "Before we can (               ) from the test.", trans: "테스트 결과를 토대로 결론을 도출해야 합니다."},
-        {word: "efficiently", mean: "효율적으로", ex: "Machine processes materials more (               ).", trans: "기계는 재료를 더 효율적으로 처리합니다."},
-        {word: "eliminate", mean: "제거하다", ex: "Eliminate unnecessary steps in production.", trans: "생산 과정에서 불필요한 단계를 제거합니다."},
-        {word: "encompass", mean: "포함하다", ex: "The program will (               ) all aspects.", trans: "프로그램은 모든 측면을 포함할 것입니다."},
-        {word: "endorse", mean: "승인하다", ex: "The board is expected to (               ) the strategy.", trans: "이사회가 전략을 승인할 것으로 예상됩니다."},
-        {word: "erroneous", mean: "잘못된", ex: "The system received (               ) data.", trans: "시스템이 잘못된 데이터를 수신했습니다."},
-        {word: "excursion", mean: "짧은 여행", ex: "The hotel offers an (               ) to local sites.", trans: "호텔은 지역 유적지 짧은 여행을 제공합니다."},
-        {word: "exquisite", mean: "정교한", ex: "Decorated with (               ) pieces of art.", trans: "정교한 예술품들로 장식되어 있습니다."},
-        {word: "facilitate", mean: "용이하게 하다", ex: "Software will (               ) communication.", trans: "소프트웨어는 소통을 용이하게 할 것입니다."},
-        {word: "familiarize with", mean: "~에 익숙해지다", ex: "Employees should (               ) office rules.", trans: "직원들은 사무실 규정에 익숙해져야 합니다."},
-        {word: "favorable", mean: "호의적인", ex: "The product received (               ) reviews.", trans: "제품은 호의적인 평가를 받았습니다."},
-        {word: "feasibility", mean: "실현 가능성", ex: "Study to check the (               ) of the plan.", trans: "계획의 실현 가능성을 확인하기 위한 조사입니다."},
-        {word: "fluctuate", mean: "변동하다", ex: "Price continues to (               ) every month.", trans: "가격이 매달 계속해서 변동하고 있습니다."},
-        {word: "formidable", mean: "위협적인", ex: "Facing (               ) competition in global market.", trans: "세계 시장에서 위협적인 경쟁에 직면해 있습니다."},
-        {word: "fragile", mean: "깨지기 쉬운", ex: "Handle with care because items are (               ).", trans: "물건이 깨지기 쉬우니 조심스럽게 다뤄주세요."},
-        {word: "galvanize", mean: "활력을 불어넣다", ex: "The speech helped (               ) the team.", trans: "연설은 팀에 활력을 불어넣는 데 도움이 되었습니다."},
-        {word: "genuine", mean: "진짜의", ex: "Always use (               ) spare parts.", trans: "항상 순정(진짜) 부품을 사용하십시오."},
-        {word: "go into effect", mean: "효력을 발생하다", ex: "The ban will (               ) next Monday.", trans: "금연 규정은 다음 주 월요일부터 효력을 발생합니다."},
-        {word: "halt", mean: "중단하다", ex: "Production was forced to (               ).", trans: "생산이 중단되어야 했습니다."},
-        {word: "haphazard", mean: "무계획적인", ex: "Files were organized in a (               ) way.", trans: "파일들이 무계획적으로 정리되어 있었습니다."},
-        {word: "heed", mean: "주의를 기울이다", ex: "Investors should (               ) the warnings.", trans: "투자자들은 경고에 주의를 기울여야 합니다."},
-        {word: "hinder", mean: "방해하다", ex: "Heavy snow might (               ) delivery.", trans: "폭설로 인해 배송이 방해를 받을 수 있습니다."},
-        {word: "hospitality", mean: "환대", ex: "Impressed by the warm (               ) of staff.", trans: "직원들의 따뜻한 환대에 깊은 인상을 받았습니다."},
-        {word: "impeccable", mean: "결점 없는", ex: "Her (               ) performance made her the top.", trans: "흠잡을 데 없는 성과로 그녀는 최고가 되었습니다."},
-        {word: "imperative", mean: "필수적인(i)", ex: "It is (               ) that we finish before deadline.", trans: "마감 전에 마치는 것이 필수적입니다."},
-        {word: "vital", mean: "필수적인(v)", ex: "Regular exercise is (               ) for health.", trans: "정기 운동은 건강에 필수적입니다."},
-        {word: "impending", mean: "임박한", ex: "Preparing for the (               ) audit.", trans: "임박한 감사를 준비하느라 바쁩니다."},
-        {word: "imply", mean: "암시하다", ex: "Price does not (               ) poor quality.", trans: "가격이 품질이 낮음을 암시하진 않습니다."},
-        {word: "in accordance with", mean: "~에 부합하여", ex: "Manufactured in (               ) with safety laws.", trans: "안전 법규에 부합하여 제조됩니다."},
-        {word: "in conjunction with", mean: "~와 협력하여", ex: "Working in (               ) with an agency.", trans: "대행사와 협력하여 일하고 있습니다."},
-        {word: "in light of", mean: "~을 고려하여", ex: "In (               ) of complaints, we improved.", trans: "불만 사항을 고려하여 서비스를 개선했습니다."},
-        {word: "under consideration", mean: "고려 중인", ex: "New projects are currently (               ).", trans: "새로운 프로젝트가 현재 고려 중입니다."},
-        {word: "in the event of", mean: "~의 경우에", ex: "In the (               ) of emergency, use stairs.", trans: "비상시에는 계단을 이용해 주세요."},
-        {word: "incentive", mean: "장려책", ex: "Company offers a cash (               ).", trans: "회사는 현금 장려책을 제공합니다."},
-        {word: "incur", mean: "발생시키다", ex: "Late payments will (               ) a fee.", trans: "연체 시 추가 비용이 발생합니다."},
-        {word: "inherent", mean: "내재된", ex: "There are (               ) risks in investing.", trans: "투자에는 내재된 위험이 따릅니다."},
-        {word: "itinerary", mean: "여행 일정표", ex: "Check the (               ) for tour time.", trans: "투어 시간은 일정표를 확인해 주세요."},
-        {word: "jointly", mean: "공동으로", ex: "Two companies will (               ) develop an app.", trans: "두 회사는 앱을 공동으로 개발할 것입니다."},
-        {word: "judicious", mean: "현명한", ex: "Made a (               ) decision to save money.", trans: "자금을 아끼는 현명한 결정을 내렸습니다."},
-        {word: "keen", mean: "열망하는", ex: "She is (               ) to learn new skills.", trans: "그녀는 새로운 기술을 배우기를 열망합니다."},
-        {word: "keep in mind", mean: "명심하다", ex: "Please (               ) that the office is closed.", trans: "사무실이 문을 닫는다는 점을 명심하십시오."},
-        {word: "keep track of", mean: "~을 파악하다", ex: "Help you (               ) your expenses.", trans: "지출 내역을 파악하도록 도와줍니다."},
-        {word: "keep up with", mean: "~을 따라잡다", ex: "Important to (               ) latest trends.", trans: "최신 트렌드를 따라잡는 것이 중요합니다."},
-        {word: "legible", mean: "읽기 쉬운", ex: "Signature must be clear and (               ).", trans: "서명은 명확하고 읽기 쉬워야 합니다."},
-        {word: "leverage", mean: "활용하다(l)", ex: "We can (               ) our strong brand name.", trans: "강력한 브랜드 인지도를 활용할 수 있습니다."},
-        {word: "take advantage of", mean: "~을 활용하다(t)", ex: "You should (               ) training sessions.", trans: "교육 세션들을 잘 활용하시기 바랍니다."},
-        {word: "utilize", mean: "활용하다(u)", ex: "We should (               ) all available resources.", trans: "가용한 모든 자원을 활용해야 합니다."},
-        {word: "liaise", mean: "연락하다", ex: "My job is to (               ) with clients.", trans: "제 업무는 고객들과 연락을 취하는 것입니다."},
-        {word: "lucid", mean: "명료한", ex: "Manager gave a (               ) explanation.", trans: "매니저는 명료하게 설명해 주었습니다."},
-        {word: "lucrative", mean: "수익성이 좋은", ex: "Proved to be a (               ) business move.", trans: "수익성이 좋은 사업적 행보임이 증명되었습니다."},
-        {word: "mandatory", mean: "의무적인", ex: "Attendance is (               ) for all staff.", trans: "모든 직원은 의무적으로 참석해야 합니다."},
-        {word: "manifest", mean: "나타내다", ex: "Symptoms began to (               ) after update.", trans: "업데이트 이후 증상들이 나타나기 시작했습니다."},
-        {word: "moderate", mean: "적당한", ex: "Keeping the machine at a (               ) speed.", trans: "기계를 적당한 속도로 유지하십시오."},
-        {word: "modification", mean: "수정", ex: "Requested a minor (               ) to the contract.", trans: "계약 조건의 약간의 수정을 요청했습니다."},
-        {word: "noteworthy", mean: "주목할 만한", ex: "Sales increase is a (               ) achievement.", trans: "매출 증가는 주목할 만한 성과입니다."},
-        {word: "notify", mean: "통지하다", ex: "Please (               ) the manager if absent.", trans: "참석 불가 시 매니저에게 통지해 주십시오."},
-        {word: "obsolete", mean: "구식의", ex: "Technology made the process (               ).", trans: "기술로 인해 기존 공정은 구식이 되었습니다."},
-        {word: "on behalf of", mean: "~을 대신하여", ex: "I am writing (               ) the director.", trans: "이사를 대신하여 이메일을 작성합니다."},
-        {word: "on short notice", mean: "갑작스럽게", ex: "Attending the meeting on (               ).", trans: "갑작스러운 통보에도 회의에 참석해 주셨습니다."},
-        {word: "optimize", mean: "최적화하다", ex: "Ways to (               ) energy consumption.", trans: "에너지 소비를 최적화할 방법을 찾고 있습니다."},
-        {word: "overhaul", mean: "점검하다", ex: "Plans to (               ) entire network system.", trans: "네트워크 시스템 전체를 점검할 계획입니다."},
-        {word: "oversee", mean: "감독하다", ex: "Manager was appointed to (               ) project.", trans: "프로젝트를 감독하기 위해 매니저가 임명되었습니다."},
-        {word: "pave", mean: "(길을) 닦다", ex: "Discovery will (               ) the way for treatment.", trans: "이 발견은 치료를 위한 길을 닦아줄 것입니다."},
-        {word: "pending", mean: "미결의", ex: "Transaction is still (               ) approval.", trans: "거래는 아직 승인을 기다리는 중입니다."},
-        {word: "perpetual", mean: "영구적인", ex: "Granted (               ) access to database.", trans: "데이터베이스 영구 접근 권한을 받았습니다."},
-        {word: "point of contact", mean: "연락 담당자", ex: "She is the main (               ) for inquiries.", trans: "그녀는 문의에 대한 주요 연락 담당자입니다."},
-        {word: "precarious", mean: "불안정한", ex: "Company is in a (               ) position.", trans: "회사는 현재 불안정한 상태에 처해 있습니다."},
-        {word: "precaution", mean: "예방 조치", ex: "Helmet is a necessary (               ) on site.", trans: "현장에서 헬멧 착용은 필수 예방 조치입니다."},
-        {word: "preliminary", mean: "예비의", ex: "The (               ) results will be released.", trans: "예비 결과가 발표될 예정입니다."},
-        {word: "prerequisite", mean: "전제 조건", ex: "Skills are a (               ) for this job.", trans: "기술은 이 업무의 전제 조건입니다."},
-        {word: "prior to", mean: "~보다 앞서", ex: "Signed (               ) the start of meeting.", trans: "회의 시작에 앞서 서명이 완료되어야 합니다."},
-        {word: "promptly", mean: "즉시", ex: "Please respond (               ) to urgent request.", trans: "긴급 요청에 즉시 응답해 주십시오."},
-        {word: "prosperous", mean: "번영하는", ex: "Goal is to build a (               ) future.", trans: "목표는 번영하는 미래를 건설하는 것입니다."},
-        {word: "provisional estimate", mean: "임시 견적", ex: "Provide a (               ) for repair costs.", trans: "수리 비용에 대한 임시 견적을 드립니다."},
-        {word: "reimburse", mean: "환급하다", ex: "Company will (               ) travel expenses.", trans: "회사는 여행 경비를 환급해 줄 것입니다."},
-        {word: "refrain from", mean: "~을 자제하다", ex: "Please (               ) taking photos.", trans: "사진 촬영을 자제해 주시기 바랍니다."},
-        {word: "reluctant", mean: "꺼리는", ex: "Members were (               ) to accept changes.", trans: "위원들은 변화를 받아들이기를 꺼렸습니다."},
-        {word: "resilient", mean: "회복력 있는", ex: "Economy proven to be (               ).", trans: "경제는 회복력이 있음이 증명되었습니다."},
-        {word: "retrieve", mean: "검색하다", ex: "Easy to (               ) lost password.", trans: "비밀번호를 검색하는 것은 쉽습니다."},
-        {word: "scrupulous", mean: "꼼꼼한", ex: "Accountant is (               ) about records.", trans: "회계사는 기록 유지에 매우 꼼꼼합니다."},
-        {word: "scrutinize", mean: "면밀히 조사하다", ex: "Experts will (               ) the data.", trans: "전문가들은 데이터를 면밀히 조사할 것입니다."},
-        {word: "stagnant", mean: "정체된", ex: "Sales remained (               ) for 3 months.", trans: "매출이 3개월 동안 정체된 상태입니다."},
-        {word: "stem from", mean: "~에서 기인하다", ex: "Problems (               ) old hardware.", trans: "문제는 오래된 하드웨어에서 기인합니다."},
-        {word: "stipulate", mean: "규정하다", ex: "Contract will (               ) delivery date.", trans: "계약서는 인도 날짜를 규정할 것입니다."},
-        {word: "stringent", mean: "엄격한", ex: "Follow (               ) safety regulations.", trans: "엄격한 안전 규정을 따라야 합니다."},
-        {word: "sturdy", mean: "튼튼한", ex: "Protected by a (               ) casing.", trans: "튼튼한 외장으로 보호됩니다."},
-        {word: "subsequent", mean: "차후의", ex: "(               ) events proved initial plan.", trans: "이후의 사건들이 초기 계획을 증명했습니다."},
-        {word: "take precedence", mean: "우선권을 갖다", ex: "Quality should (               ) over speed.", trans: "품질 관리가 속도보다 우선시되어야 합니다."},
-        {word: "tedious", mean: "지루한", ex: "Data entry can be a (               ) task.", trans: "데이터 입력은 지루한 작업이 될 수 있습니다."},
-        {word: "temporarily", mean: "일시적으로", ex: "Website will be (               ) unavailable.", trans: "웹사이트를 일시적으로 이용할 수 없습니다."},
-        {word: "tentatively", mean: "잠정적으로", ex: "Next meeting is (               ) scheduled.", trans: "다음 회의는 잠정적으로 예정되어 있습니다."},
-        {word: "terminate", mean: "종료하다", ex: "Decided to (               ) the contract early.", trans: "계약을 조기 종료하기로 결정했습니다."},
-        {word: "unanimous", mean: "만장일치의", ex: "Reached a (               ) decision.", trans: "만장일치로 결정을 내렸습니다."},
-        {word: "unprecedented", mean: "전례 없는", ex: "Saw (               ) growth in sales.", trans: "매출에서 전례 없는 성장을 기록했습니다."},
-        {word: "unravel", mean: "해결하다", ex: "Work hard to (               ) the issue.", trans: "문제를 해결하기 위해 열심히 일했습니다."},
-        {word: "validity", mean: "유효성", ex: "Confirm the (               ) of license.", trans: "면허가 만료되기 전에 유효성을 확인해 주십시오."},
-        {word: "verify", mean: "확인하다", ex: "System will (               ) your identity.", trans: "시스템이 귀하의 신원을 확인합니다."},
-        {word: "versatile", mean: "다재다능한", ex: "This (               ) tool has many tasks.", trans: "이 다재다능한 도구는 쓰임새가 많습니다."},
-        {word: "vigilant", mean: "경계하는", ex: "Remain (               ) against security threats.", trans: "보안 위협에 대해 항상 경계해야 합니다."},
-        {word: "volatile", mean: "변동이 심한", ex: "Stock market has been very (               ).", trans: "주식 시장의 변동성이 매우 심했습니다."},
-        {word: "withstand", mean: "견디다", ex: "Designed to (               ) strong winds.", trans: "강풍을 견딜 수 있도록 설계되었습니다."},
-        {word: "yield", mean: "산출하다", ex: "Strategy is starting to (               ) results.", trans: "전략이 결과를 산출하기 시작했습니다."},
-        // 이미지 단어 추가
-        {word: "vague", mean: "애매한, 희미한", ex: "His answer was (               ).", trans: "그의 대답은 애매했습니다."},
-        {word: "perfectionist", mean: "완완벽주의자", ex: "He is a total (               ).", trans: "그는 철저한 완벽주의자입니다."},
-        {word: "indifferent", mean: "무관심한", ex: "She is (               ) to politics.", trans: "그녀는 정치에 무관심합니다."},
-        {word: "productivity", mean: "생산성", ex: "Aiming for higher (               ).", trans: "더 높은 생산성을 목표로 합니다."},
-        {word: "assignment", mean: "과제", ex: "Finish your (               ) by Friday.", trans: "금요일까지 과제를 끝내세요."},
-        {word: "gradually", mean: "점진적으로", ex: "The situation improved (               ).", trans: "상황이 점진적으로 개선되었습니다."}
-    ];
+const data = [
+    {w: "a wide array of", m: "다양한", ex: "The store offers (               ) electronic accessories for laptops."},
+    {w: "account for", m: "차지하다", ex: "Overseas sales (               ) more than half of the company's total profit."},
+    {w: "acknowledge", m: "수령을 알리다", ex: "Please (               ) receipt of the package by signing the delivery form."},
+    {w: "acquire", m: "인수하다", ex: "Our firm plans to (               ) a promising startup to expand its market share."},
+    {w: "adhere to", m: "~을 준수하다", ex: "All staff members must (               ) the safety guidelines in the laboratory."},
+    {w: "compliance", m: "준수", ex: "All employees must work in (               ) with the safety standards."},
+    {w: "comply with", m: "~을 준수하다", ex: "The new factory must (               ) with environmental regulations."},
+    {w: "adversely", m: "부정적으로", ex: "The technical delay will (               ) affect the product launch schedule."},
+    {w: "advocate", m: "지지하다", ex: "The group is known to (               ) for the rights of underprivileged children."},
+    {w: "affordable", m: "가격이 적당한", ex: "The company aims to provide (               ) housing for young professionals."},
+    {w: "aggregate", m: "합계의", ex: "The (               ) score of the two matches decided the winner."},
+    {w: "alleviate", m: "완화하다", ex: "New measures were introduced to (               ) traffic congestion."},
+    {w: "mitigate", m: "완화시키다", ex: "Planting more trees can help (               ) the effects of climate change."},
+    {w: "ambiguous", m: "모호한", ex: "The instructions were too (               ), leading to confusion."},
+    {w: "ample", m: "충분한", ex: "There was (               ) evidence to support the theory proposed."},
+    {w: "as of late", m: "최근에", ex: "The stock market has been quite volatile (               )."},
+    {w: "assess", m: "평가하다", ex: "The committee will (               ) the impact of the new policy."},
+    {w: "attest to", m: "~을 증명하다", ex: "His success in the industry (               ) his hard work."},
+    {w: "attribute", m: "~의 덕분으로 돌리다", ex: "The CEO (               ) the company's success to teamwork."},
+    {w: "auspicious", m: "유망한", ex: "The project had an (               ) start with full funding secured."},
+    {w: "prospective", m: "유망한", ex: "(               ) students are invited to visit the campus."},
+    {w: "be consistent with", m: "~와 일치하다", ex: "The results of the study are (               ) with previous research."},
+    {w: "coincide", m: "일치하다", ex: "My vacation plans (               ) with my sister’s wedding date."},
+    {w: "be entitled to", m: "~할 자격이 있다", ex: "All full-time employees are (               ) to three weeks of vacation."},
+    {w: "eligible", m: "자격이 있는", ex: "Only small businesses are (               ) for the new grant."},
+    {w: "be liable for", m: "~에 대해 책임이 있다", ex: "The tenant is (               ) for any damage caused to the property."},
+    {w: "belated", m: "뒤늦은", ex: "She sent a (               ) birthday card to her friend."},
+    {w: "briefly", m: "잠시", ex: "The manager (               ) explained the changes to the project schedule."},
+    {w: "broaden", m: "넓히다", ex: "Traveling to different countries helps to (               ) one's perspective."},
+    {w: "circumvent", m: "우회하다", ex: "The company tried to (               ) the new tax laws."},
+    {w: "coherent", m: "일관성 있는", ex: "The speaker presented a (               ) argument."},
+    {w: "commence", m: "시작되다", ex: "The construction is set to (               ) next month."},
+    {w: "commitment to", m: "~에 대한 헌신", ex: "The organization has a strong (               ) to conservation."},
+    {w: "dedicate", m: "헌신하다", ex: "She decided to (               ) her life to helping the underprivileged."},
+    {w: "confidential", m: "기밀의", ex: "All patient records are kept strictly (               )."},
+    {w: "conducive", m: "도움이 되는", ex: "A quiet environment is (               ) to studying."},
+    {w: "contingency plan", m: "비상 대책", ex: "The company has a (               ) in case the supplier fails."},
+    {w: "contrary to", m: "~와는 반대로", ex: "(               ) to expectations, the movie was a huge success."},
+    {w: "curtail", m: "축소하다", ex: "The government decided to (               ) spending on infrastructure."},
+    {w: "delegate", m: "위임하다", ex: "A good manager knows how to (               ) tasks effectively."},
+    {word: "deplete", mean: "고갈시키다", ex: "Years of overfarming have (               ) the soil."},
+    {word: "designated", mean: "지정된", ex: "Please smoke only in the (               ) areas."},
+    {word: "deterrent", mean: "억제책", ex: "Heavy fines serve as a (               ) to illegal parking."},
+    {word: "detrimental", mean: "해로운", ex: "Lack of sleep can be (               ) to your health."},
+    {word: "devote A to B", mean: "A를 B에 쏟다", ex: "He decided to (               ) all his energy to the project."},
+    {word: "discretion", mean: "재량", ex: "The manager has the (               ) to offer discounts."},
+    {word: "discretionary", mean: "자유 재량의", ex: "The committee has a (               ) fund for expenses."},
+    {word: "discrepancy", mean: "불일치", ex: "The auditor found a (               ) in the records."},
+    {word: "draw a conclusion", mean: "결론을 도출하다", ex: "We need more data before we can (               )."},
+    {word: "efficiently", mean: "효율적으로", ex: "The new software will help the team work more (               )."},
+    {word: "eliminate", mean: "제거하다", ex: "The company plans to (               ) all unnecessary costs."},
+    {word: "encompass", mean: "포함하다", ex: "The training program will (               ) all aspects of service."},
+    {word: "endorse", mean: "승인하다", ex: "The celebrity decided to (               ) the new product."},
+    {word: "erroneous", mean: "잘못된", ex: "The news report contained (               ) information."},
+    {word: "excursion", mean: "짧은 여행", ex: "The students went on an (               ) to the museum."},
+    {word: "exquisite", mean: "정교한", ex: "The jewelry box was decorated with (               ) carvings."},
+    {word: "facilitate", mean: "용이하게 하다", ex: "The system will (               ) communication."},
+    {word: "familiarize with", mean: "~에 익숙해지다", ex: "New employees must (               ) company policies."},
+    {word: "favorable", mean: "호의적인", ex: "The review of the new restaurant was very (               )."},
+    {word: "feasibility", mean: "실연 가능성", ex: "Experts are conducting a study to determine the (               )."},
+    {word: "fluctuate", mean: "변동하다", ex: "Gas prices often (               ) depending on oil supply."},
+    {word: "formidable", mean: "위협적인", ex: "The opposing team is a (               ) opponent."},
+    {word: "fragile", mean: "깨지기 쉬운", ex: "Please handle this with care as it is (               )."},
+    {word: "galvanize", mean: "활력을 불어넣다", ex: "The leader's speech was designed to (               ) the crowd."},
+    {word: "genuine", mean: "진짜의", ex: "The painting was confirmed to be a (               ) masterpiece."},
+    {word: "go into effect", mean: "효력을 발생하다", ex: "The regulations will (               ) starting next Monday."},
+    {word: "halt", mean: "중단하다", ex: "Production was temporarily (               ) due to a power outage."},
+    {word: "haphazard", mean: "무계획적인", ex: "The books were arranged in a (               ) way."},
+    {word: "heed", mean: "주의를 기울이다", ex: "Drivers should (               ) the warning signs."},
+    {word: "hinder", mean: "방해하다", ex: "Heavy snow (               ) the rescue efforts."},
+    {word: "hospitality", mean: "환대", ex: "We were overwhelmed by the warm (               )."},
+    {word: "impeccable", mean: "결점 없는", ex: "The pianist’s performance was (               )."},
+    {word: "imperative", mean: "필수적인", ex: "It is (               ) that all safety procedures are followed."},
+    {word: "vital", mean: "필수적인", ex: "Strong communication is (               ) for success."},
+    {word: "impending", mean: "임박한", ex: "The dark clouds suggested an (               ) storm."},
+    {word: "imply", mean: "암시하다", ex: "His silence seemed to (               ) agreement."},
+    {word: "in accordance with", mean: "~에 부합하여", ex: "Constructed in (               ) with safety standards."},
+    {word: "in conjunction with", mean: "~와 협력하여", ex: "Launched in (               ) with the product release."},
+    {word: "in light of", mean: "~을 고려하여", ex: "Revised the budget in (               ) of the losses."},
+    {word: "under consideration", mean: "고려 중인", ex: "Several candidates are still (               ) for the job."},
+    {word: "in the event of", mean: "~의 경우에", ex: "(               ) an emergency, use the stairs."},
+    {word: "incentive", mean: "장려책", ex: "The company offers a performance-based (               )."},
+    {word: "incur", mean: "발생시키다", ex: "Late payments will (               ) an additional fee."},
+    {word: "inherent", mean: "내재된", ex: "There are (               ) risks involved in any venture."},
+    {word: "itinerary", mean: "여행 일정표", ex: "The agent provided a detailed (               ) for our trip."},
+    {word: "jointly", mean: "공동으로", ex: "The companies developed the technology (               )."},
+    {word: "judicious", mean: "현명한", ex: "The manager made a (               ) decision."},
+    {word: "keen", mean: "열망하는", ex: "She is (               ) to start her new job."},
+    {word: "keep in mind", mean: "명심하다", ex: "Please (               ) that the office will be closed."},
+    {word: "keep track of", mean: "~을 파악하다", ex: "The app helps users (               ) daily expenses."},
+    {word: "keep up with", mean: "~을 따라잡다", ex: "Difficult to (               ) the fast-paced changes."},
+    {word: "legible", mean: "읽기 쉬운", ex: "Make sure your handwriting is (               )."},
+    {word: "leverage", mean: "활용하다", ex: "Plan to (               ) the brand name for new markets."},
+    {word: "take advantage of", mean: "~을 활용하다", ex: "You should (               ) the free training."},
+    {word: "utilize", mean: "활용하다", ex: "Learned how to (               ) the new software."},
+    {word: "liaise", mean: "연락하다", ex: "The department will (               ) with the PR team."},
+    {word: "lucid", mean: "명료한", ex: "The professor gave a (               ) explanation."},
+    {word: "lucrative", mean: "수익성이 좋은", ex: "Real estate can be a very (               ) business."},
+    {word: "mandatory", mean: "의무적인", ex: "Attendance is (               ) for all lab employees."},
+    {word: "manifest", mean: "나타내다", ex: "Symptoms began to (               ) shortly after infection."},
+    {word: "moderate", mean: "적당한", ex: "Engage in (               ) exercise three times a week."},
+    {word: "modification", mean: "수정", ex: "Suggested several (               ) to improve efficiency."},
+    {word: "noteworthy", mean: "주목할 만한", ex: "The collection includes several (               ) works."},
+    {word: "notify", mean: "통지하다", ex: "The hotel will (               ) guests of changes."},
+    {word: "obsolete", mean: "구식의", ex: "CDs have become largely (               )."},
+    {word: "on behalf of", mean: "~을 대신하여", ex: "The lawyer spoke (               ) the client."},
+    {word: "on short notice", mean: "갑작스럽게", ex: "She prepared the presentation (               )."},
+    {word: "optimize", mean: "최적화하다", ex: "Working to (               ) engine performance."},
+    {word: "overhaul", mean: "점검하다", ex: "Decided to (               ) the entire fleet for safety."},
+    {word: "oversee", mean: "감독하다", ex: "The manager will (               ) the implementation."},
+    {word: "pave", mean: "(길을) 닦다", ex: "The discovery will (               ) the way for processors."},
+    {word: "pending", mean: "미결의", ex: "The application is still (               ) approval."},
+    {word: "perpetual", mean: "영구적인", ex: "Region is known for its (               ) rain."},
+    {word: "point of contact", mean: "연락 담당자", ex: "Use the office manager as your primary (               )."},
+    {word: "precarious", mean: "불안정한", ex: "The climber was in a (               ) position."},
+    {word: "precaution", mean: "예방 조치", ex: "Wearing a helmet is a necessary (               )."},
+    {word: "preliminary", mean: "예비의", ex: "Published their (               ) findings in a journal."},
+    {word: "prerequisite", mean: "전제 조건", ex: "Completion is a (               ) for the class."},
+    {word: "prior to", mean: "~보다 앞서", ex: "Submit reports two days (               ) the meeting."},
+    {word: "promptly", mean: "즉시", ex: "Emergency services arrived (               ) at the scene."},
+    {word: "prosperous", mean: "번영하는", ex: "The town grew into a (               ) city."},
+    {word: "provisional estimate", mean: "임시 견적", ex: "Provided a (               ) for the renovation."},
+    {word: "reimburse", mean: "환급하다", ex: "Company will (               ) all travel expenses."},
+    {word: "refrain from", mean: "~을 자제하다", ex: "Please (               ) talking in the library."},
+    {word: "reluctant", mean: "꺼리는", ex: "He was (               ) to share personal information."},
+    {word: "resilient", mean: "회복력 있는", ex: "Despite setbacks, the team remained (               )."},
+    {word: "retrieve", mean: "검색하다", ex: "Database allows users to (               ) information."},
+    {word: "scrupulous", mean: "꼼꼼한", ex: "Accountant was very (               ) with records."},
+    {word: "scrutinize", mean: "면밀히 조사하다", ex: "Investigators will (               ) the documents."},
+    {word: "stagnant", mean: "정체된", ex: "Sales have remained (               ) for three years."},
+    {word: "stem from", mean: "~에서 기인하다", ex: "Health problems (               ) a lack of activity."},
+    {word: "stipulate", mean: "규정하다", ex: "The contract (               ) the completion date."},
+    {word: "stringent", mean: "엄격한", ex: "Introduced (               ) security measures."},
+    {word: "sturdy", mean: "튼튼한", ex: "The hikers wore (               ) boots for the trail."},
+    {word: "subsequent", mean: "차후의", ex: "(               ) trials were more successful."},
+    {word: "take precedence", mean: "우선권을 갖다", ex: "Safety must (               ) over speed."},
+    {word: "tedious", mean: "지루한", ex: "The task of entering data was very (               )."},
+    {word: "temporarily", mean: "일시적으로", ex: "Website will be (               ) unavailable."},
+    {word: "tentatively", mean: "잠정적으로", ex: "The next meeting is (               ) scheduled."},
+    {word: "terminate", mean: "종료하다", ex: "Decided to (               ) the contract early."},
+    {word: "unanimous", mean: "만장일치의", ex: "Reached a (               ) decision on the budget."},
+    {word: "unprecedented", mean: "전례 없는", ex: "Saw (               ) growth in sales this year."},
+    {word: "unravel", mean: "해결하다", ex: "Worked hard to (               ) the technical issue."},
+    {word: "validity", mean: "유효성", ex: "Confirm the (               ) of your license."},
+    {word: "verify", mean: "확인하다", ex: "The system will (               ) your identity."},
+    {word: "versatile", mean: "다재다능한", ex: "This (               ) tool has many uses."},
+    {word: "vigilant", mean: "경계하는", ex: "Remain (               ) against security threats."},
+    {word: "volatile", mean: "변동이 심한", ex: "The market has been quite (               ) lately."},
+    {word: "withstand", mean: "견디다", ex: "Designed to (               ) strong winds."},
+    {word: "yield", mean: "산출하다", ex: "The techniques have (               ) a higher crop."},
+    {word: "vague", mean: "애매한", ex: "His answer was too (               ) to be useful."},
+    {word: "perfectionist", mean: "완벽주의자", ex: "She is a total (               ) in her work."},
+    {word: "indifferent", mean: "무관심한", ex: "He seemed (               ) to the results."}
+];
 
-    let wrongToEng = JSON.parse(localStorage.getItem('voca_wrong')) || [];
-    let testQueue = [], currentIndex = 0, currentMode = '', correctCount = 0;
+let queue = [], curIdx = 0, score = 0, mode = '';
 
-    function renderList() {
-        document.getElementById('count-display').innerText = words.length;
-        const container = document.getElementById('list-container');
-        container.innerHTML = words.map((w, i) => `
-            <div class="word-item ${wrongToEng.includes(i) ? 'is-incorrect' : ''}">
-                <span>${i+1}. <b>${w.word}</b> : ${w.mean}</span>
-            </div>
-        `).join('');
+function start(m) {
+    mode = m;
+    let count = document.getElementById('qCount').value;
+    queue = [...data].sort(() => Math.random() - 0.5).slice(0, count);
+    curIdx = 0; score = 0;
+    document.getElementById('setup-view').style.display = 'none';
+    document.getElementById('test-view').style.display = 'block';
+    show();
+}
+
+function show() {
+    const q = queue[curIdx];
+    document.getElementById('progress-text').innerText = `${curIdx + 1} / ${queue.length}`;
+    document.getElementById('score-text').innerText = `맞은 개수: ${score}`;
+    
+    const optArea = document.getElementById('options-area');
+    const inputArea = document.getElementById('input-box');
+    
+    if (mode === 'ex') {
+        document.getElementById('question-text').innerText = q.ex;
+        optArea.style.display = 'none';
+        inputArea.style.display = 'block';
+        document.getElementById('answer-input').value = '';
+        document.getElementById('answer-input').focus();
+    } else {
+        document.getElementById('question-text').innerText = (mode === 'toEng') ? q.m : (q.w || q.word);
+        optArea.style.display = 'grid';
+        inputArea.style.display = 'none';
+        makeOpts(q);
     }
+}
 
-    function getSynonyms(word) {
-        for (let group of synonymGroups) {
-            if (group.includes(word)) return group;
-        }
-        return [word];
-    }
-
-    function startTest(mode, onlyWrong) {
-        currentMode = mode;
-        let pool = onlyWrong ? wrongToEng : words.map((_, i) => i);
-        if (pool.length === 0) return alert("기록이 없습니다.");
-
-        let count = parseInt(document.getElementById('testCount').value) || 20;
-        let selected = pool.sort(() => Math.random() - 0.5).slice(0, count);
-        
-        testQueue = selected.map(id => ({...words[id], originalId: id}));
-        currentIndex = 0; correctCount = 0;
-        document.getElementById('test-area').style.display = 'block';
-        showQuestion();
-    }
-
-    function showQuestion() {
-        const q = testQueue[currentIndex];
-        document.getElementById('question-info').innerText = `${currentIndex + 1} / ${testQueue.length}`;
-        document.getElementById('question-trans').innerText = q.trans;
-        
-        const optArea = document.getElementById('options-area');
-        const subArea = document.getElementById('subjective-area');
-
-        if (currentMode === 'example') {
-            optArea.style.display = 'none'; subArea.style.display = 'block';
-            document.getElementById('question-text').innerText = q.ex;
-            document.getElementById('answerInput').value = ''; document.getElementById('answerInput').focus();
-        } else {
-            optArea.style.display = 'grid'; subArea.style.display = 'none';
-            document.getElementById('question-text').innerText = (currentMode === 'toEng') ? q.mean : q.word;
-            makeOptions(q);
+function makeOpts(correct) {
+    const area = document.getElementById('options-area');
+    area.innerHTML = '';
+    
+    // 유의어 그룹 찾기 (중복 방지)
+    let forbidden = [correct.w || correct.word];
+    for (let group of synonyms) {
+        if (group.includes(correct.w || correct.word)) {
+            forbidden = group; break;
         }
     }
 
-    function makeOptions(correct) {
-        const area = document.getElementById('options-area');
-        area.innerHTML = '';
-        
-        // 유의어 그룹을 찾아 선지에서 배제
-        const exclusions = getSynonyms(correct.word);
-        
-        let distractors = words
-            .filter(w => !exclusions.includes(w.word))
-            .sort(() => Math.random() - 0.5)
-            .slice(0, 3);
-            
-        let final = [...distractors, correct].sort(() => Math.random() - 0.5);
-        final.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.className = 'option-btn';
-            btn.innerText = (currentMode === 'toEng') ? opt.word : opt.mean;
-            btn.onclick = () => handleResult(opt.word === correct.word);
-            area.appendChild(btn);
-        });
-    }
+    let pool = data.filter(item => !forbidden.includes(item.w || item.word));
+    let distractors = pool.sort(() => Math.random() - 0.5).slice(0, 3);
+    let final = [...distractors, correct].sort(() => Math.random() - 0.5);
 
-    function handleResult(isCorrect) {
-        const q = testQueue[currentIndex];
-        if (isCorrect) {
-            correctCount++;
-            wrongToEng = wrongToEng.filter(id => id !== q.originalId);
-        } else {
-            alert(`틀렸습니다! 정답: ${q.word} (${q.mean})`);
-            if(!wrongToEng.includes(q.originalId)) wrongToEng.push(q.originalId);
-        }
-        localStorage.setItem('voca_wrong', JSON.stringify(wrongToEng));
-        next();
-    }
+    final.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.innerText = (mode === 'toEng') ? (opt.w || opt.word) : (opt.m || opt.mean);
+        btn.onclick = () => check(opt === correct);
+        area.appendChild(btn);
+    });
+}
 
-    function checkSubjectiveAnswer() {
-        const input = document.getElementById('answerInput').value.trim().toLowerCase();
-        handleResult(input === testQueue[currentIndex].word.toLowerCase());
-    }
+function check(isCorrect) {
+    const q = queue[curIdx];
+    if (isCorrect) score++;
+    else alert(`❌ 틀렸습니다!\n정답: ${q.w || q.word} (${q.m || q.mean})`);
+    next();
+}
 
-    function next() {
-        currentIndex++;
-        if (currentIndex < testQueue.length) showQuestion();
-        else {
-            alert(`완료! 점수: ${correctCount}/${testQueue.length}`);
-            document.getElementById('test-area').style.display = 'none';
-            renderList();
-        }
-    }
+function checkSub() {
+    const input = document.getElementById('answer-input').value.trim().toLowerCase();
+    const correct = (queue[curIdx].w || queue[curIdx].word).toLowerCase();
+    check(input === correct);
+}
 
-    function resetIncorrect() {
-        if(confirm("초기화하시겠습니까?")) {
-            wrongToEng = []; localStorage.removeItem('voca_wrong'); renderList();
-        }
-    }
+function next() {
+    curIdx++;
+    if (curIdx < queue.length) show();
+    else finish();
+}
 
-    renderList();
+function finish() {
+    alert(`🎉 테스트 종료!\n최종 점수: ${score} / ${queue.length}`);
+    location.reload();
+}
 </script>
 </body>
 </html>
